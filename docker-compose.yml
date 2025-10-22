@@ -3,16 +3,14 @@ services:
     image: postgres
     restart: always
     environment:
-      POSTGRES_USER: hutchi
-      POSTGRES_DB: dogs
-      POSTGRES_PASSWORD: ILoveDog$
+      POSTGRES_PASSWORD: example
     healthcheck:
       test: ["CMD-SHELL", "pg_isready"]
       interval: 1s
       timeout: 5s
       retries: 10
     ports:
-      - 5431:5432
+      - 5432:5432
     volumes:
       - pgdata:/var/lib/postgresql/data 
 
@@ -21,6 +19,8 @@ services:
     restart: always
     ports:
       - 8080:8080
+
+  # Remember for the api that it depends on the database health check.
 
 volumes:
   pgdata:
