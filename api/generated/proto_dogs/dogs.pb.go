@@ -4,7 +4,7 @@
 // 	protoc        v6.33.0
 // source: common/dogs.proto
 
-package proto
+package proto_dogs
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -128,7 +128,7 @@ const file_common_dogs_proto_rawDesc = "" +
 	"categories\"9\n" +
 	"\vDogCategory\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x16\n" +
-	"\x06breeds\x18\x02 \x03(\tR\x06breedsB\x11Z\x0fgenerated/protob\x06proto3"
+	"\x06breeds\x18\x02 \x03(\tR\x06breedsB\x16Z\x14generated/proto_dogsb\x06proto3"
 
 var (
 	file_common_dogs_proto_rawDescOnce sync.Once

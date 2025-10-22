@@ -2,9 +2,9 @@
 // versions:
 // 	protoc-gen-go v1.36.10
 // 	protoc        v6.33.0
-// source: common/dog_operations.proto
+// source: common/dog_queries.proto
 
-package proto
+package proto_dogs
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -21,6 +21,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// TODO: Do I need these?
 type BreedAdd struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Breed         string                 `protobuf:"bytes,1,opt,name=breed,proto3" json:"breed,omitempty"`
@@ -30,7 +31,7 @@ type BreedAdd struct {
 
 func (x *BreedAdd) Reset() {
 	*x = BreedAdd{}
-	mi := &file_common_dog_operations_proto_msgTypes[0]
+	mi := &file_common_dog_queries_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -42,7 +43,7 @@ func (x *BreedAdd) String() string {
 func (*BreedAdd) ProtoMessage() {}
 
 func (x *BreedAdd) ProtoReflect() protoreflect.Message {
-	mi := &file_common_dog_operations_proto_msgTypes[0]
+	mi := &file_common_dog_queries_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -55,7 +56,7 @@ func (x *BreedAdd) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BreedAdd.ProtoReflect.Descriptor instead.
 func (*BreedAdd) Descriptor() ([]byte, []int) {
-	return file_common_dog_operations_proto_rawDescGZIP(), []int{0}
+	return file_common_dog_queries_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *BreedAdd) GetBreed() string {
@@ -74,7 +75,7 @@ type BreedDelete struct {
 
 func (x *BreedDelete) Reset() {
 	*x = BreedDelete{}
-	mi := &file_common_dog_operations_proto_msgTypes[1]
+	mi := &file_common_dog_queries_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -86,7 +87,7 @@ func (x *BreedDelete) String() string {
 func (*BreedDelete) ProtoMessage() {}
 
 func (x *BreedDelete) ProtoReflect() protoreflect.Message {
-	mi := &file_common_dog_operations_proto_msgTypes[1]
+	mi := &file_common_dog_queries_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -99,7 +100,7 @@ func (x *BreedDelete) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BreedDelete.ProtoReflect.Descriptor instead.
 func (*BreedDelete) Descriptor() ([]byte, []int) {
-	return file_common_dog_operations_proto_rawDescGZIP(), []int{1}
+	return file_common_dog_queries_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *BreedDelete) GetBreed() string {
@@ -118,7 +119,7 @@ type CategoryAdd struct {
 
 func (x *CategoryAdd) Reset() {
 	*x = CategoryAdd{}
-	mi := &file_common_dog_operations_proto_msgTypes[2]
+	mi := &file_common_dog_queries_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -130,7 +131,7 @@ func (x *CategoryAdd) String() string {
 func (*CategoryAdd) ProtoMessage() {}
 
 func (x *CategoryAdd) ProtoReflect() protoreflect.Message {
-	mi := &file_common_dog_operations_proto_msgTypes[2]
+	mi := &file_common_dog_queries_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -143,7 +144,7 @@ func (x *CategoryAdd) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CategoryAdd.ProtoReflect.Descriptor instead.
 func (*CategoryAdd) Descriptor() ([]byte, []int) {
-	return file_common_dog_operations_proto_rawDescGZIP(), []int{2}
+	return file_common_dog_queries_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *CategoryAdd) GetBreed() *DogCategory {
@@ -162,7 +163,7 @@ type CategoryDelete struct {
 
 func (x *CategoryDelete) Reset() {
 	*x = CategoryDelete{}
-	mi := &file_common_dog_operations_proto_msgTypes[3]
+	mi := &file_common_dog_queries_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -174,7 +175,7 @@ func (x *CategoryDelete) String() string {
 func (*CategoryDelete) ProtoMessage() {}
 
 func (x *CategoryDelete) ProtoReflect() protoreflect.Message {
-	mi := &file_common_dog_operations_proto_msgTypes[3]
+	mi := &file_common_dog_queries_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -187,7 +188,7 @@ func (x *CategoryDelete) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CategoryDelete.ProtoReflect.Descriptor instead.
 func (*CategoryDelete) Descriptor() ([]byte, []int) {
-	return file_common_dog_operations_proto_rawDescGZIP(), []int{3}
+	return file_common_dog_queries_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *CategoryDelete) GetBreed() *DogCategory {
@@ -197,11 +198,11 @@ func (x *CategoryDelete) GetBreed() *DogCategory {
 	return nil
 }
 
-var File_common_dog_operations_proto protoreflect.FileDescriptor
+var File_common_dog_queries_proto protoreflect.FileDescriptor
 
-const file_common_dog_operations_proto_rawDesc = "" +
+const file_common_dog_queries_proto_rawDesc = "" +
 	"\n" +
-	"\x1bcommon/dog_operations.proto\x12\x06common\x1a\x11common/dogs.proto\" \n" +
+	"\x18common/dog_queries.proto\x12\x06common\x1a\x11common/dogs.proto\" \n" +
 	"\bBreedAdd\x12\x14\n" +
 	"\x05breed\x18\x01 \x01(\tR\x05breed\"#\n" +
 	"\vBreedDelete\x12\x14\n" +
@@ -209,29 +210,29 @@ const file_common_dog_operations_proto_rawDesc = "" +
 	"\vCategoryAdd\x12)\n" +
 	"\x05breed\x18\x01 \x01(\v2\x13.common.DogCategoryR\x05breed\";\n" +
 	"\x0eCategoryDelete\x12)\n" +
-	"\x05breed\x18\x01 \x01(\v2\x13.common.DogCategoryR\x05breedB\x11Z\x0fgenerated/protob\x06proto3"
+	"\x05breed\x18\x01 \x01(\v2\x13.common.DogCategoryR\x05breedB\x16Z\x14generated/proto_dogsb\x06proto3"
 
 var (
-	file_common_dog_operations_proto_rawDescOnce sync.Once
-	file_common_dog_operations_proto_rawDescData []byte
+	file_common_dog_queries_proto_rawDescOnce sync.Once
+	file_common_dog_queries_proto_rawDescData []byte
 )
 
-func file_common_dog_operations_proto_rawDescGZIP() []byte {
-	file_common_dog_operations_proto_rawDescOnce.Do(func() {
-		file_common_dog_operations_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_common_dog_operations_proto_rawDesc), len(file_common_dog_operations_proto_rawDesc)))
+func file_common_dog_queries_proto_rawDescGZIP() []byte {
+	file_common_dog_queries_proto_rawDescOnce.Do(func() {
+		file_common_dog_queries_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_common_dog_queries_proto_rawDesc), len(file_common_dog_queries_proto_rawDesc)))
 	})
-	return file_common_dog_operations_proto_rawDescData
+	return file_common_dog_queries_proto_rawDescData
 }
 
-var file_common_dog_operations_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
-var file_common_dog_operations_proto_goTypes = []any{
+var file_common_dog_queries_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_common_dog_queries_proto_goTypes = []any{
 	(*BreedAdd)(nil),       // 0: common.BreedAdd
 	(*BreedDelete)(nil),    // 1: common.BreedDelete
 	(*CategoryAdd)(nil),    // 2: common.CategoryAdd
 	(*CategoryDelete)(nil), // 3: common.CategoryDelete
 	(*DogCategory)(nil),    // 4: common.DogCategory
 }
-var file_common_dog_operations_proto_depIdxs = []int32{
+var file_common_dog_queries_proto_depIdxs = []int32{
 	4, // 0: common.CategoryAdd.breed:type_name -> common.DogCategory
 	4, // 1: common.CategoryDelete.breed:type_name -> common.DogCategory
 	2, // [2:2] is the sub-list for method output_type
@@ -241,9 +242,9 @@ var file_common_dog_operations_proto_depIdxs = []int32{
 	0, // [0:2] is the sub-list for field type_name
 }
 
-func init() { file_common_dog_operations_proto_init() }
-func file_common_dog_operations_proto_init() {
-	if File_common_dog_operations_proto != nil {
+func init() { file_common_dog_queries_proto_init() }
+func file_common_dog_queries_proto_init() {
+	if File_common_dog_queries_proto != nil {
 		return
 	}
 	file_common_dogs_proto_init()
@@ -251,17 +252,17 @@ func file_common_dog_operations_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_common_dog_operations_proto_rawDesc), len(file_common_dog_operations_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_common_dog_queries_proto_rawDesc), len(file_common_dog_queries_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_common_dog_operations_proto_goTypes,
-		DependencyIndexes: file_common_dog_operations_proto_depIdxs,
-		MessageInfos:      file_common_dog_operations_proto_msgTypes,
+		GoTypes:           file_common_dog_queries_proto_goTypes,
+		DependencyIndexes: file_common_dog_queries_proto_depIdxs,
+		MessageInfos:      file_common_dog_queries_proto_msgTypes,
 	}.Build()
-	File_common_dog_operations_proto = out.File
-	file_common_dog_operations_proto_goTypes = nil
-	file_common_dog_operations_proto_depIdxs = nil
+	File_common_dog_queries_proto = out.File
+	file_common_dog_queries_proto_goTypes = nil
+	file_common_dog_queries_proto_depIdxs = nil
 }

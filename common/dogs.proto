@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package common;
 
-option go_package = "generated/proto";
+option go_package = "generated/proto_dogs";
 
 message AllDogs {
     repeated DogCategory categories = 1;

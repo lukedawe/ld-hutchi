@@ -2,10 +2,11 @@ syntax = "proto3";
 
 package common;
 
-option go_package = "generated/proto";
+option go_package = "generated/proto_dogs";
 
 import "common/dogs.proto";
 
+// TODO: Do I need these?
 message BreedAdd {
     string breed = 1;
 }
