@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package common;
+
+option go_package = "generated/proto";
+
+import "common/dogs.proto";
+
+message BreedAdd {
+    string breed = 1;
+}
+
+message BreedDelete {
+    string breed = 1;
+}
+
+message CategoryAdd {
+    DogCategory breed = 1;
+}
+
+message CategoryDelete {
+    DogCategory breed = 1;
+}
