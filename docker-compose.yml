@@ -1,3 +1,4 @@
+# A Docker Compose file to set up a dev environment (not for production)
 services:
   db:
     image: postgres
@@ -19,8 +20,5 @@ services:
     restart: always
     ports:
       - 8080:8080
-
-  # Remember for the api that it depends on the database health check.
-
 volumes:
   pgdata:

@@ -1,5 +1,5 @@
 package dtos
 
 type Breed struct {
-	Name string `binding:"required"`
+	Name string `json:"name" binding:"required"`
 }
