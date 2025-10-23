@@ -74,8 +74,6 @@ func setupRouter(DB *sql.DB) *gin.Engine {
 
 	v1 := r.Group("/v1")
 
-	// TODO: This should return the URIs of all the dogs instead of the dogs data.
-	// TODO: Pagination for getting the database.
 	v1.GET("/breeds/categories/:page/:page_size", h.GetCategoriesToBreeds) // Get all categories mapped to breeds.
 	v1.GET("/categories")                                                  // Get all categories,
 	v1.GET("/category/:name")                                              // Get the category for a category name.
