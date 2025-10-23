@@ -2,16 +2,20 @@ package handlers
 
 import (
 	"log"
+	"lukedawe/hutchi/dtos"
 	"lukedawe/hutchi/models"
-	"lukedawe/hutchi/requests"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
+type AddCategoryRequest struct {
+	Category dtos.Category `json:"category" binding:"required"`
+}
+
 func (h *Handler) AddCategory(c *gin.Context) {
-	var request requests.AddCategoryMessage
+	var request AddCategoryRequest
 
 	if err := c.ShouldBindBodyWithJSON(&request); err != nil {
 		HandleError(c, http.StatusBadRequest, err, "")

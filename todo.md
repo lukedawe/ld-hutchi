@@ -4,8 +4,8 @@
 - [ ] Unit tests.
 - [ ] Logging.
     - [ ] Some other middleware like rate limiting.
-- [ ] Documentation.
+- [ ] Documentation (with OpenAPI?).
 - [X] Pagination for getting the database.
 - [ ] HATEOAS API? (probably not).
 - [ ] Caching? -- No because of self hosting.
-- [ ] Make the PK the name for the categories and breeds.
+- [X] Make name unique in the database.

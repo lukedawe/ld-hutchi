@@ -3,8 +3,8 @@ package models
 import "lukedawe/hutchi/dtos"
 
 type Category struct {
-	ID     uint `gorm:"primarykey"`
-	Name   string
+	ID     uint   `gorm:"primarykey"`
+	Name   string `gorm:"unique"`
 	Breeds []Breed
 }
 

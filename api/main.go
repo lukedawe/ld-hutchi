@@ -75,9 +75,9 @@ func setupRouter(DB *sql.DB) *gin.Engine {
 	v1 := r.Group("/v1")
 
 	v1.GET("/breeds/categories/:page/:page_size", h.GetCategoriesToBreeds) // Get all categories mapped to breeds.
-	v1.GET("/categories")                                                  // Get all categories,
-	v1.GET("/category/:name")                                              // Get the category for a category name.
-	v1.GET("/category/:name/breeds")                                       // Get all the breeds for a particular breed.
+	v1.GET("/categories", h.GetCategories)                                 // Get all categories.
+	v1.GET("/category/:name", h.GetCategory)                               // Get the category for a category name.
+	v1.GET("/category/:name/breeds", h.GetCategoryToBreeds)                // Get all the breeds for a particular breed.
 	v1.GET("/breed/:breed")                                                // Get a particular breed.
 	v1.POST("/category", h.AddCategory)                                    // Add a category.
 	v1.POST("/breed")                                                      // Add a breed.
@@ -91,7 +91,14 @@ func setupRouter(DB *sql.DB) *gin.Engine {
 func main() {
 	// gin.SetMode(gin.ReleaseMode)
 
-	DB := connectDB("dev.env")
+	var envFileName string
+	if gin.IsDebugging() {
+		envFileName = "dev.env"
+	} else {
+		envFileName = ".env"
+	}
+
+	DB := connectDB(envFileName)
 
 	if DB == nil {
 		log.Fatalln("DB connection is nil")

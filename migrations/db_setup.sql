@@ -9,9 +9,9 @@ DROP SEQUENCE IF EXISTS breeds_id_seq;
 CREATE SEQUENCE breeds_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 START 68 CACHE 1;
 
 CREATE TABLE "public"."breeds" (
-    "id" integer DEFAULT nextval('breeds_id_seq') NOT NULL,
     "name" character varying NOT NULL,
     "category_id" integer NOT NULL,
+    "id" integer DEFAULT nextval('breeds_id_seq') NOT NULL,
     CONSTRAINT "breeds_pkey" PRIMARY KEY ("id")
 )
 WITH (oids = false);
@@ -22,13 +22,15 @@ DROP SEQUENCE IF EXISTS "Category_id_seq";
 CREATE SEQUENCE "Category_id_seq" INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 START 85 CACHE 1;
 
 CREATE TABLE "public"."categories" (
-    "id" integer DEFAULT nextval('"Category_id_seq"') NOT NULL,
     "name" character varying NOT NULL,
+    "id" integer DEFAULT nextval('"Category_id_seq"') NOT NULL,
     CONSTRAINT "Category_pkey" PRIMARY KEY ("id")
 )
 WITH (oids = false);
 
+CREATE UNIQUE INDEX categories_name ON public.categories USING btree (name);
+
 
 ALTER TABLE ONLY "public"."breeds" ADD CONSTRAINT "Breed_category_fkey" FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE NOT DEFERRABLE;
 
--- 2025-10-23 13:24:45 UTC
+-- 2025-10-23 14:15:43 UTC
