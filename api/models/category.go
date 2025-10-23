@@ -1,0 +1,28 @@
+package models
+
+import "lukedawe/hutchi/dtos"
+
+type Category struct {
+	ID     uint `gorm:"primarykey"`
+	Name   string
+	Breeds []Breed
+}
+
+func (c *Category) ToResponse() dtos.Category {
+	breeds := BreedsToDTO(c.Breeds)
+
+	return dtos.Category{
+		Name:   c.Name,
+		Breeds: breeds,
+	}
+}
+
+func CategoriesToDTO(categories []Category) []dtos.Category {
+	response := make([]dtos.Category, len(categories))
+
+	for i, category := range categories {
+		response[i] = category.ToResponse()
+	}
+
+	return response
+}

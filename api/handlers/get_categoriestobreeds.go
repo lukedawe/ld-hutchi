@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"lukedawe/hutchi/model"
+	"lukedawe/hutchi/models"
 	"lukedawe/hutchi/util"
 	"net/http"
 
@@ -22,7 +22,7 @@ func (h *Handler) GetCategoriesToBreeds(c *gin.Context) {
 		return
 	}
 
-	categories, err := gorm.G[model.Category](h.DB).
+	categories, err := gorm.G[models.Category](h.DB).
 		Scopes(util.Paginate(params.Page, params.PageSize)).
 		Preload("Breeds", nil).
 		Find(c)
@@ -32,5 +32,7 @@ func (h *Handler) GetCategoriesToBreeds(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, categories)
+	response := models.CategoriesToDTO(categories)
+
+	c.JSON(http.StatusOK, response)
 }

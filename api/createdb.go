@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"log"
-	"lukedawe/hutchi/model"
+	"lukedawe/hutchi/models"
 	"os"
 
 	"gorm.io/driver/postgres"
@@ -36,14 +36,14 @@ func PopulateDb(envFile string, DB *sql.DB) {
 
 	for category, breeds := range allDogs {
 		ctx := context.Background()
-		gormCategory := &model.Category{Name: category}
-		if err := gorm.G[model.Category](gormDb).Create(ctx, gormCategory); err != nil {
+		gormCategory := &models.Category{Name: category}
+		if err := gorm.G[models.Category](gormDb).Create(ctx, gormCategory); err != nil {
 			log.Fatalln(err.Error())
 		}
 
 		for _, breed := range breeds {
 			// Create the breeds the category contains
-			if err := gorm.G[model.Breed](gormDb).Create(ctx, &model.Breed{Name: breed, CategoryID: gormCategory.ID}); err != nil {
+			if err := gorm.G[models.Breed](gormDb).Create(ctx, &models.Breed{Name: breed, CategoryID: gormCategory.ID}); err != nil {
 				log.Fatalln(err.Error())
 			}
 		}

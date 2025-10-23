@@ -18,5 +18,14 @@ func (h *Handler) AddCategory(c *gin.Context) {
 	// 	return
 	// }
 
+	// var request requests.AddCategoryMessage
+	// if err := c.ShouldBindBodyWithJSON(&request); err != nil {
+	// 	HandleError(c, http.StatusBadRequest, err, "")
+	// }
+
+	// if request != nil {
+
+	// }
+
 	c.Status(http.StatusCreated)
 }
