@@ -76,16 +76,16 @@ func setupRouter(DB *sql.DB) *gin.Engine {
 
 	// TODO: This should return the URIs of all the dogs instead of the dogs data.
 	// TODO: Pagination for getting the database.
-	v1.GET("/categories_to_breeds/:page/:page_size", h.GetCategoriesToBreeds) // Get all categories mapped to ,
-	v1.GET("/categories")                                                     // Get all categories,
-	v1.GET("/category/:name")                                                 // Get the category for a category name.
-	v1.GET("/category/:name/breeds")                                          // Get all the breeds for a particular breed.
-	v1.GET("/breed/:breed")                                                   // Get a particular breed.
-	v1.POST("/category", h.AddCategory)                                       // Add a category.
-	v1.POST("/breed")                                                         // Add a breed.
-	v1.PUT("/categories")                                                     // Batch add categories
-	v1.DELETE("/breed")                                                       // Delete a breed.
-	v1.DELETE("/category")                                                    // Delete a category.
+	v1.GET("/breeds/categories/:page/:page_size", h.GetCategoriesToBreeds) // Get all categories mapped to breeds.
+	v1.GET("/categories")                                                  // Get all categories,
+	v1.GET("/category/:name")                                              // Get the category for a category name.
+	v1.GET("/category/:name/breeds")                                       // Get all the breeds for a particular breed.
+	v1.GET("/breed/:breed")                                                // Get a particular breed.
+	v1.POST("/category", h.AddCategory)                                    // Add a category.
+	v1.POST("/breed")                                                      // Add a breed.
+	v1.PUT("/categories")                                                  // Batch add categories
+	v1.DELETE("/breed")                                                    // Delete a breed.
+	v1.DELETE("/category")                                                 // Delete a category.
 
 	return r
 }

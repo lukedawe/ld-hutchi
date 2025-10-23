@@ -6,6 +6,7 @@ import (
 
 func Paginate(page uint, pageSize uint) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
+
 		if page == 0 {
 			page = 1
 		}
