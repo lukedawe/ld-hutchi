@@ -6,4 +6,5 @@
     - [ ] Some other middleware like rate limiting.
 - [ ] Documentation
 - [ ] Pagination for getting the database
-- [ ] HATEOAS API?
+- [ ] HATEOAS API? (probably not)
+- [ ] Caching? -- No because of self hosting

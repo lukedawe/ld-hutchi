@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type categoriesToBreedsParams struct {
@@ -21,11 +22,12 @@ func (h *Handler) GetCategoriesToBreeds(c *gin.Context) {
 		return
 	}
 
-	var categories []model.Category
-	if err := h.DB.Model(&model.Category{}).
+	categories, err := gorm.G[model.Category](h.DB).
 		Scopes(util.Paginate(params.Page, params.PageSize)).
-		Preload("Breeds").
-		Find(&categories).Error; err != nil {
+		Preload("Breeds", nil).
+		Find(c)
+
+	if err != nil {
 		HandleError(c, http.StatusInternalServerError, err, "")
 		return
 	}
