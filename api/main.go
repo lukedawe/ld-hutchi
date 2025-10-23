@@ -7,6 +7,7 @@ import (
 	"lukedawe/hutchi/util"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -39,6 +40,10 @@ func connectDB(envFile string) *sql.DB {
 
 	log.Println("Successfully connected to the database")
 
+	// Configure the database connection.
+	DB.SetMaxOpenConns(10)
+	DB.SetConnMaxLifetime(time.Hour)
+
 	return DB
 }
 
@@ -69,8 +74,18 @@ func setupRouter(DB *sql.DB) *gin.Engine {
 
 	v1 := r.Group("/v1")
 
-	v1.GET("/all_dogs", h.GetAllDogs)
-	v1.POST("/add_category", h.AddCategory)
+	// TODO: This should return the URIs of all the dogs instead of the dogs data.
+	// TODO: Pagination for getting the database.
+	v1.GET("/categories_to_breeds/:page/:page_size", h.GetCategoriesToBreeds) // Get all categories mapped to ,
+	v1.GET("/categories")                                                     // Get all categories,
+	v1.GET("/category/:name")                                                 // Get the category for a category name.
+	v1.GET("/category/:name/breeds")                                          // Get all the breeds for a particular breed.
+	v1.GET("/breed/:breed")                                                   // Get a particular breed.
+	v1.POST("/category", h.AddCategory)                                       // Add a category.
+	v1.POST("/breed")                                                         // Add a breed.
+	v1.PUT("/categories")                                                     // Batch add categories
+	v1.DELETE("/breed")                                                       // Delete a breed.
+	v1.DELETE("/category")                                                    // Delete a category.
 
 	return r
 }

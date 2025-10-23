@@ -13,11 +13,11 @@ func (h *Handler) AddCategory(c *gin.Context) {
 	addMessage := &proto_dogs.CategoryAdd{}
 	message, err := io.ReadAll(c.Request.Body)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		HandleError(c, http.StatusBadRequest, err, "")
 		return
 	}
 	if err := proto.Unmarshal(message, addMessage); err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		HandleError(c, http.StatusBadRequest, err, "")
 		return
 	}
 
