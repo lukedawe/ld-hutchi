@@ -1,6 +1,6 @@
 package dtos
 
 type Category struct {
-	Name   string
-	Breeds []Breed
+	Name   string  `binding:"required"`
+	Breeds []Breed `binding:"required"`
 }

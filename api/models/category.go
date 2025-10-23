@@ -17,6 +17,19 @@ func (c *Category) ToResponse() dtos.Category {
 	}
 }
 
+func CategoryDtoToModel(c *dtos.Category) Category {
+	breeds := make([]Breed, len(c.Breeds))
+
+	for i, breed := range c.Breeds {
+		breeds[i] = BreedDtoToModel(&breed)
+	}
+
+	return (Category{
+		Name:   c.Name,
+		Breeds: breeds,
+	})
+}
+
 func CategoriesToDTO(categories []Category) []dtos.Category {
 	response := make([]dtos.Category, len(categories))
 

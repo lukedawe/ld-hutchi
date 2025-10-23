@@ -1,15 +1,23 @@
 package models
 
-import "lukedawe/hutchi/dtos"
+import (
+	"lukedawe/hutchi/dtos"
+)
 
 type Breed struct {
 	ID         uint `gorm:"primarykey"`
 	Name       string
-	CategoryID uint `json:"-"`
+	CategoryID uint
 }
 
 func (b *Breed) ToResponse() dtos.Breed {
 	return dtos.Breed{
+		Name: b.Name,
+	}
+}
+
+func BreedDtoToModel(b *dtos.Breed) Breed {
+	return Breed{
 		Name: b.Name,
 	}
 }

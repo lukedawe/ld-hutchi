@@ -6,5 +6,5 @@ import (
 
 // Separate out the message requests from the data that we are adding.
 type AddCategoryMessage struct {
-	Category dtos.Category
+	Category dtos.Category `binding:"required"`
 }

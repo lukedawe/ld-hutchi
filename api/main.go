@@ -101,7 +101,7 @@ func main() {
 
 	r := setupRouter(DB)
 
-	log.Fatalln(r.Run().Error())
+	log.Fatalln(r.Run(":8081").Error())
 
 	defer func() {
 		if DB != nil {

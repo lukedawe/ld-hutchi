@@ -1,31 +1,32 @@
 package handlers
 
 import (
+	"log"
+	"lukedawe/hutchi/models"
+	"lukedawe/hutchi/requests"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func (h *Handler) AddCategory(c *gin.Context) {
-	// addMessage := &proto_dogs.CategoryAdd{}
-	// message, err := io.ReadAll(c.Request.Body)
-	// if err != nil {
-	// 	HandleError(c, http.StatusBadRequest, err, "")
-	// 	return
-	// }
-	// if err := proto.Unmarshal(message, addMessage); err != nil {
-	// 	HandleError(c, http.StatusBadRequest, err, "")
-	// 	return
-	// }
+	var request requests.AddCategoryMessage
 
-	// var request requests.AddCategoryMessage
-	// if err := c.ShouldBindBodyWithJSON(&request); err != nil {
-	// 	HandleError(c, http.StatusBadRequest, err, "")
-	// }
+	if err := c.ShouldBindBodyWithJSON(&request); err != nil {
+		HandleError(c, http.StatusBadRequest, err, "")
+		return
+	}
 
-	// if request != nil {
+	log.Println("Response binded successfully")
 
-	// }
+	categoryModel := models.CategoryDtoToModel(&request.Category)
+
+	// Send to the database
+	if err := gorm.G[models.Category](h.DB).Create(c, &categoryModel); err != nil {
+		HandleError(c, http.StatusInternalServerError, err, "")
+		return
+	}
 
 	c.Status(http.StatusCreated)
 }
