@@ -1,4 +1,4 @@
-package util
+package scopes
 
 import (
 	"gorm.io/gorm"
@@ -6,7 +6,6 @@ import (
 
 func Paginate(page uint, pageSize uint) func(db *gorm.Statement) {
 	return func(db *gorm.Statement) {
-
 		if page == 0 {
 			page = 1
 		}

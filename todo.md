@@ -9,3 +9,4 @@
 - [ ] HATEOAS API? (probably not).
 - [ ] Caching? -- No because of self hosting.
 - [X] Make name unique in the database.
+- [ ] Move queries over to the services package.
