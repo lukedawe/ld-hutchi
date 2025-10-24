@@ -3,9 +3,9 @@ package models
 import "lukedawe/hutchi/dtos"
 
 type Category struct {
-	ID     uint   `gorm:"primarykey"`
-	Name   string `gorm:"unique"`
-	Breeds []Breed
+	ID     uint    `gorm:"primarykey"`
+	Name   string  `gorm:"unique"`
+	Breeds []Breed `gorm:"foreignKey:CategoryID"`
 }
 
 func (c *Category) ToResponse() dtos.Category {

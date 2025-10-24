@@ -4,7 +4,7 @@
 - [ ] Unit tests.
 - [ ] Logging.
     - [ ] Some other middleware like rate limiting.
-- [ ] Documentation (with OpenAPI?).
+- [ ] Documentation (with OpenAPI / Swagger?).
 - [X] Pagination for getting the database.
 - [ ] HATEOAS API? (probably not).
 - [ ] Caching? -- No because of self hosting.
