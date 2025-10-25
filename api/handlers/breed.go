@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"log"
 	"lukedawe/hutchi/dtos/requests"
 	"lukedawe/hutchi/dtos/responses"
+	"lukedawe/hutchi/dtos/responses/errors"
 	"lukedawe/hutchi/services"
 	"net/http"
 
@@ -37,27 +39,26 @@ import (
 
 func (h *Handler) GetBreed(c *gin.Context) {
 	var request requests.GetBreed
-
 	if err := c.ShouldBindUri(&request); err != nil {
-		HandleError(c, http.StatusBadRequest, err, "")
+		c.Error(errors.ErrBadRequestBinding.SetError(err))
 		return
 	}
 
 	breeds, err := services.GetBreeds(h.DB, c, request.Name)
-
 	if err != nil {
-		HandleError(c, http.StatusBadRequest, err, "")
+		c.Error(services.TranslateDbError(err))
 		return
 	}
 
 	response := make([]responses.BreedWithCategory, len(breeds))
-
 	for i, breed := range breeds {
 		response[i] = responses.BreedWithCategory{
 			Name:     breed.Name,
 			Category: breed.Category.Name,
 		}
 	}
+
+	log.Println("Got breed: ", response)
 
 	c.JSON(http.StatusOK, response)
 }

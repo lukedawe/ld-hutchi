@@ -50,7 +50,7 @@ func connectDB(envFile string) *sql.DB {
 func getGormDb(sqldb *sql.DB) *gorm.DB {
 	gormDb, err := gorm.Open(postgres.New(postgres.Config{
 		Conn: sqldb,
-	}), &gorm.Config{})
+	}), &gorm.Config{TranslateError: true})
 
 	if err != nil {
 		if gin.IsDebugging() {
@@ -63,6 +63,8 @@ func getGormDb(sqldb *sql.DB) *gorm.DB {
 
 func setupRouter(DB *sql.DB) *gin.Engine {
 	r := gin.Default()
+	// Register middleware before roots
+	r.Use(handlers.ErrorHandler())
 
 	h := &handlers.Handler{DB: getGormDb(DB)}
 
@@ -74,14 +76,14 @@ func setupRouter(DB *sql.DB) *gin.Engine {
 
 	v1 := r.Group("/v1")
 
-	v1.GET("/breeds/categories/:page/:page_size", h.GetCategoriesToBreeds) // Get all categories mapped to breeds.
+	v1.GET("/breeds/categories/:page/:page_size", h.GetCategoriesToBreeds) // Get all categories mapped to breeds (paginated).
 	v1.GET("/categories", h.GetCategories)                                 // Get all categories.
 	v1.GET("/category/:name", h.GetCategory)                               // Get the category for a category name.
 	v1.GET("/category/:name/breeds", h.GetCategoryToBreeds)                // Get all the breeds for a particular breed.
 	v1.GET("/breed/:name", h.GetBreed)                                     // Get a particular breed.
 	v1.POST("/category", h.AddCategory)                                    // Add a category.
 	v1.POST("/breed")                                                      // Add a breed.
-	v1.PUT("/categories")                                                  // Batch add categories
+	v1.PUT("/categories", h.AddCategories)                                 // Batch add categories
 	v1.DELETE("/breed")                                                    // Delete a breed.
 	v1.DELETE("/category")                                                 // Delete a category.
 

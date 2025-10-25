@@ -4,6 +4,7 @@ import (
 	"log"
 	"lukedawe/hutchi/dtos/requests"
 	"lukedawe/hutchi/dtos/responses"
+	"lukedawe/hutchi/dtos/responses/errors"
 	"lukedawe/hutchi/models"
 	"lukedawe/hutchi/services"
 	"net/http"
@@ -13,9 +14,8 @@ import (
 
 func (h *Handler) GetCategories(c *gin.Context) {
 	categories, err := services.GetCategories(h.DB, c)
-
 	if err != nil {
-		HandleError(c, http.StatusInternalServerError, err, "")
+		c.Error(services.TranslateDbError(err))
 		return
 	}
 
@@ -31,19 +31,19 @@ func (h *Handler) GetCategories(c *gin.Context) {
 func (h *Handler) GetCategoriesToBreeds(c *gin.Context) {
 	var request requests.GetCategoriesToBreeds
 	if err := c.ShouldBindUri(&request); err != nil {
-		HandleError(c, http.StatusBadRequest, err, "Uri Malformed")
+		c.Error(errors.ErrBadRequestBinding.SetError(err))
 		return
 	}
 
 	categories, err := services.GetCategoriesToBreeds(h.DB, c, request.Page, request.PageSize)
 	if err != nil {
-		HandleError(c, http.StatusInternalServerError, err, "")
+		c.Error(services.TranslateDbError(err))
 		return
 	}
 
 	response := make([]responses.Category, len(categories))
 	for i, category := range categories {
-		response[i] = categoryToResponse(&category)
+		response[i] = categoryModelToResponse(category)
 	}
 
 	c.JSON(http.StatusOK, response)
@@ -52,18 +52,17 @@ func (h *Handler) GetCategoriesToBreeds(c *gin.Context) {
 func (h *Handler) GetCategory(c *gin.Context) {
 	var request requests.GetCategory
 	if err := c.ShouldBindUri(&request); err != nil {
-		HandleError(c, http.StatusBadRequest, err, "")
+		c.Error(errors.ErrBadRequestBinding.SetError(err))
 		return
 	}
 
-	category, err := services.GetCategory(h.DB, c, request.Name)
-
+	category, err := services.GetCategoryByName(h.DB, c, request.Name)
 	if err != nil {
-		HandleError(c, http.StatusBadRequest, err, "")
+		c.Error(services.TranslateDbError(err))
 		return
 	}
 
-	response := categoryToResponse(&category)
+	response := categoryModelToResponse(category)
 	log.Println(response)
 	c.JSON(http.StatusOK, response)
 }
@@ -71,13 +70,13 @@ func (h *Handler) GetCategory(c *gin.Context) {
 func (h *Handler) GetCategoryToBreeds(c *gin.Context) {
 	var request requests.GetCategoryToBreeds
 	if err := c.ShouldBindUri(&request); err != nil {
-		HandleError(c, http.StatusBadRequest, err, "")
+		c.Error(errors.ErrBadRequestBinding.SetError(err))
 		return
 	}
 
-	category, err := services.GetCategory(h.DB, c, request.Name)
+	category, err := services.GetCategoryByName(h.DB, c, request.Name)
 	if err != nil {
-		HandleError(c, http.StatusBadRequest, err, "")
+		c.Error(services.TranslateDbError(err))
 		return
 	}
 
@@ -92,7 +91,7 @@ func (h *Handler) GetCategoryToBreeds(c *gin.Context) {
 func (h *Handler) AddCategory(c *gin.Context) {
 	var request requests.AddCategory
 	if err := c.ShouldBindBodyWithJSON(&request); err != nil {
-		HandleError(c, http.StatusBadRequest, err, "")
+		c.Error(errors.ErrBadRequestBinding.SetError(err))
 		return
 	}
 
@@ -100,29 +99,68 @@ func (h *Handler) AddCategory(c *gin.Context) {
 	categoryModel.Breeds = make([]models.Breed, len(request.Breeds))
 	for i, breed := range request.Breeds {
 		categoryModel.Breeds[i] = models.Breed{
-			Name: breed,
+			Name: breed.Name,
 		}
 	}
 	// Send to the database
-	if err := services.CreateCategory(h.DB, c, categoryModel); err != nil {
-		HandleError(c, http.StatusInternalServerError, err, "")
+	if err := services.CreateCategory(h.DB, c, &categoryModel); err != nil {
+		c.Error(services.TranslateDbError(err))
 		return
 	}
 
-	c.Status(http.StatusCreated)
+	response := categoryModelToResponse(categoryModel)
+	c.JSON(http.StatusCreated, response)
+}
+
+func (h *Handler) AddCategories(c *gin.Context) {
+	var request requests.AddCategories
+	if err := c.ShouldBindBodyWithJSON(&request); err != nil {
+		c.Error(errors.ErrBadRequestBinding.SetError(err))
+		return
+	}
+
+	categoryModels := make([]models.Category, len(request.Categories))
+	for i, category := range request.Categories {
+		categoryModels[i] = categoryRequestToModel(category)
+	}
+
+	if err := services.CreateCategories(h.DB, c, categoryModels); err != nil {
+		c.Error(services.TranslateDbError(err))
+		return
+	}
+
+	var response responses.Categories
+	response.Categories = make([]responses.Category, len(categoryModels))
+	for i, category := range categoryModels {
+		response.Categories[i] = categoryModelToResponse(category)
+	}
+
+	c.JSON(http.StatusCreated, response)
 }
 
 // Helper functions for conversion between the DB model and the responses
-func categoryToResponse(categoryModel *models.Category) responses.Category {
-	breeds := make([]responses.Breed, len(categoryModel.Breeds))
+func categoryModelToResponse(categoryModel models.Category) responses.Category {
+	breeds := make([]responses.CategoryBreed, len(categoryModel.Breeds))
 	for i, breed := range categoryModel.Breeds {
-		breeds[i] = responses.Breed{
-			Name: breed.Name,
-		}
+		breeds[i].Name = breed.Name
 	}
 
 	return responses.Category{
 		Name:   categoryModel.Name,
+		Breeds: breeds,
+	}
+}
+
+func categoryRequestToModel(categoryRequest requests.AddCategory) models.Category {
+	breeds := make([]models.Breed, len(categoryRequest.Breeds))
+	for j, breed := range categoryRequest.Breeds {
+		breeds[j] = models.Breed{
+			Name: breed.Name,
+		}
+	}
+
+	return models.Category{
+		Name:   categoryRequest.Name,
 		Breeds: breeds,
 	}
 }

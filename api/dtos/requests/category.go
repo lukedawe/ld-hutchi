@@ -1,8 +1,16 @@
 package requests
 
+type Breed struct {
+	Name string `json:"breeds" binding:"required"`
+}
+
 type AddCategory struct {
-	Name   string   `json:"name" binding:"required"`
-	Breeds []string `json:"breeds" binding:"required"`
+	Name   string  `json:"name" binding:"required"`
+	Breeds []Breed `json:"breeds" binding:"required"`
+}
+
+type AddCategories struct {
+	Categories []AddCategory `json:"categories"`
 }
 
 type GetCategoriesToBreeds struct {

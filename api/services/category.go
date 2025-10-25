@@ -19,7 +19,7 @@ func GetCategoriesToBreeds(db *gorm.DB, c context.Context, page uint, pageSize u
 		Find(c)
 }
 
-func GetCategory(db *gorm.DB, c context.Context, name string) (models.Category, error) {
+func GetCategoryByName(db *gorm.DB, c context.Context, name string) (models.Category, error) {
 	return gorm.G[models.Category](db).
 		Preload("Breeds", nil).
 		Where("name = ?", name).
@@ -27,6 +27,10 @@ func GetCategory(db *gorm.DB, c context.Context, name string) (models.Category, 
 		First(c)
 }
 
-func CreateCategory(db *gorm.DB, c context.Context, category models.Category) error {
-	return gorm.G[models.Category](db).Create(c, &category)
+func CreateCategory(db *gorm.DB, c context.Context, category *models.Category) error {
+	return gorm.G[models.Category](db).Create(c, category)
+}
+
+func CreateCategories(db *gorm.DB, c context.Context, category []models.Category) error {
+	return gorm.G[models.Category](db).CreateInBatches(c, &category, 10)
 }

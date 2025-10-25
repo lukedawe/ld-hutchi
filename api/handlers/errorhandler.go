@@ -2,21 +2,33 @@ package handlers
 
 import (
 	"log"
+	"lukedawe/hutchi/dtos/responses/errors"
 
 	"github.com/gin-gonic/gin"
 )
 
-// Production aware error handler
-func HandleError(c *gin.Context, status int, err error, productionErrorMessage string) {
-	log.Printf("API Error [%d]: %s - Request: %s %s",
-		status, err.Error(), c.Request.Method, c.Request.URL.Path)
+func ErrorHandler() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		ctx.Next() // Process the request.
 
-	if gin.IsDebugging() {
-		c.AbortWithError(status, err)
-		return
+		if len(ctx.Errors) > 0 {
+
+			log.Println("Error detected.")
+
+			err := ctx.Errors.Last().Err
+			// Map the error to the API-specific error code.
+			response, ok := err.(errors.ErrorResponse)
+			if !ok {
+				response = errors.ErrInternalUnknown.SetError(err)
+			}
+			log.Printf("API Error [%d]: %s - Request: %s %s",
+				response.Status, err.Error(), ctx.Request.Method, ctx.Request.URL.Path)
+			if gin.IsDebugging() {
+				ctx.AbortWithStatusJSON(response.Status, response)
+				return
+			}
+			ctx.AbortWithStatusJSON(response.Status, response.ToProductionErrorStruct())
+			return
+		}
 	}
-	if productionErrorMessage == "" {
-		c.AbortWithStatusJSON(status, gin.H{"error": "Request failed"})
-	}
-	c.AbortWithStatusJSON(status, gin.H{"error": productionErrorMessage})
 }

@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func CreateBreeds(db *gorm.DB, c context.Context, breed *models.Breed) error {
+func CreateBreed(db *gorm.DB, c context.Context, breed *models.Breed) error {
 	return gorm.G[models.Breed](db).Create(c, breed)
 }
 
