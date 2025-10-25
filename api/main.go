@@ -82,7 +82,7 @@ func setupRouter(DB *sql.DB) *gin.Engine {
 	v1.GET("/category/:name/breeds", h.GetCategoryToBreeds)                // Get all the breeds for a particular breed.
 	v1.GET("/breed/:name", h.GetBreed)                                     // Get a particular breed.
 	v1.POST("/category", h.AddCategory)                                    // Add a category.
-	v1.POST("/breed")                                                      // Add a breed.
+	v1.POST("/breed", h.AddBreed)                                          // Add a breed.
 	v1.PUT("/categories", h.AddCategories)                                 // Batch add categories
 	v1.DELETE("/breed")                                                    // Delete a breed.
 	v1.DELETE("/category")                                                 // Delete a category.

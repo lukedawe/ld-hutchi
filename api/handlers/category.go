@@ -41,7 +41,7 @@ func (h *Handler) GetCategoriesToBreeds(c *gin.Context) {
 		return
 	}
 
-	response := make([]responses.Category, len(categories))
+	response := make([]responses.CategoryCreated, len(categories))
 	for i, category := range categories {
 		response[i] = categoryModelToResponse(category)
 	}
@@ -129,8 +129,8 @@ func (h *Handler) AddCategories(c *gin.Context) {
 		return
 	}
 
-	var response responses.Categories
-	response.Categories = make([]responses.Category, len(categoryModels))
+	var response responses.CategoriesCreated
+	response.Categories = make([]responses.CategoryCreated, len(categoryModels))
 	for i, category := range categoryModels {
 		response.Categories[i] = categoryModelToResponse(category)
 	}
@@ -139,13 +139,13 @@ func (h *Handler) AddCategories(c *gin.Context) {
 }
 
 // Helper functions for conversion between the DB model and the responses
-func categoryModelToResponse(categoryModel models.Category) responses.Category {
+func categoryModelToResponse(categoryModel models.Category) responses.CategoryCreated {
 	breeds := make([]responses.CategoryBreed, len(categoryModel.Breeds))
 	for i, breed := range categoryModel.Breeds {
 		breeds[i].Name = breed.Name
 	}
 
-	return responses.Category{
+	return responses.CategoryCreated{
 		Name:   categoryModel.Name,
 		Breeds: breeds,
 	}

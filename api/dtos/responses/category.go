@@ -4,11 +4,11 @@ type CategoryBreed struct {
 	Name string
 }
 
-type Category struct {
+type CategoryCreated struct {
 	Name   string          `json:"name" binding:"required"`
 	Breeds []CategoryBreed `json:"breeds" binding:"required"`
 }
 
-type Categories struct {
-	Categories []Category `json:"categories"`
+type CategoriesCreated struct {
+	Categories []CategoryCreated `json:"categories"`
 }

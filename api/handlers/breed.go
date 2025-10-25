@@ -5,37 +5,45 @@ import (
 	"lukedawe/hutchi/dtos/requests"
 	"lukedawe/hutchi/dtos/responses"
 	"lukedawe/hutchi/dtos/responses/errors"
+	"lukedawe/hutchi/models"
 	"lukedawe/hutchi/services"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-// func (h *Handler) AddBreed(c *gin.Context) {
-// 	var request requests.AddBreed
+func (h *Handler) AddBreed(c *gin.Context) {
+	var request requests.AddBreed
+	if err := c.ShouldBindBodyWithJSON(&request); err != nil {
+		c.Error(errors.ErrBadRequestBinding.SetError(err))
+		return
+	}
 
-// 	if err := c.ShouldBindBodyWithJSON(&request); err != nil {
-// 		HandleError(c, http.StatusBadRequest, err, "")
-// 		return
-// 	}
+	// Find the category
+	category, err := services.GetCategoryByName(h.DB, c, request.CategoryName)
+	if err != nil {
+		c.Error(services.TranslateDbError(err))
+		return
+	}
 
-// 	log.Println("Response binded successfully")
+	breedModel := &models.Breed{
+		Name:     request.Name,
+		Category: category,
+	}
 
-// 	// Find the category
+	// Send to the database
+	if err := services.CreateBreed(h.DB, c, breedModel); err != nil {
+		c.Error(services.TranslateDbError(err))
+		return
+	}
 
-// 	breedModel:=&models.Breed{
-// 		Name: request.Name,
-// 		Category: ,,
-// 	}
+	response := responses.BreedCreated{
+		Name: breedModel.Name,
+	}
 
-// 	// Send to the database
-// 	if err := gorm.G[models.Category](h.DB).Create(c, &categoryModel); err != nil {
-// 		HandleError(c, http.StatusInternalServerError, err, "")
-// 		return
-// 	}
-
-// 	c.Status(http.StatusCreated)
-// }
+	// Create the response
+	c.JSON(http.StatusCreated, response)
+}
 
 func (h *Handler) GetBreed(c *gin.Context) {
 	var request requests.GetBreed
