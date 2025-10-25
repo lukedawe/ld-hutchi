@@ -7,6 +7,7 @@ import (
 	"lukedawe/hutchi/util"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -20,16 +21,20 @@ func connectDB(envFile string) *sql.DB {
 		log.Fatalln(err.Error())
 	}
 
+	port, err := strconv.Atoi(os.Getenv("DB_PORT"))
+	if err != nil {
+		log.Fatalln(port)
+	}
+
 	dsn := util.GetDsn(
 		os.Getenv("DB_HOST"),
-		5432,
+		uint(port),
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASSWORD"),
 		os.Getenv("DB_NAME"),
 	)
 
 	DB, err := sql.Open("pgx", dsn)
-
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -53,9 +58,7 @@ func getGormDb(sqldb *sql.DB) *gorm.DB {
 	}), &gorm.Config{TranslateError: true})
 
 	if err != nil {
-		if gin.IsDebugging() {
-			log.Fatalln(err)
-		}
+		log.Fatalln(err)
 	}
 
 	return gormDb
@@ -83,7 +86,11 @@ func setupRouter(DB *sql.DB) *gin.Engine {
 	v1.GET("/breed/:name", h.GetBreed)                                     // Get a particular breed.
 	v1.POST("/category", h.AddCategory)                                    // Add a category.
 	v1.POST("/breed", h.AddBreed)                                          // Add a breed.
-	v1.PUT("/categories", h.AddCategories)                                 // Batch add categories
+	v1.POST("/categories", h.AddCategories)                                // Batch add categories.
+	v1.PUT("/categories")                                                  // Batch add categories (idempotent).
+	v1.PUT("/breeds")                                                      // Batch add breeds (idempotent).
+	v1.PATCH("/category/:name")                                            // Update a category.
+	v1.PATCH("/breed/:name")                                               // Update a breed.
 	v1.DELETE("/breed")                                                    // Delete a breed.
 	v1.DELETE("/category")                                                 // Delete a category.
 
@@ -108,7 +115,7 @@ func main() {
 
 	r := setupRouter(DB)
 
-	log.Fatalln(r.Run(":8081").Error())
+	log.Fatalln(r.Run().Error())
 
 	defer func() {
 		if DB != nil {

@@ -1,7 +1,7 @@
 package requests
 
 type Breed struct {
-	Name string `json:"breeds" binding:"required"`
+	Name string `json:"name" binding:"required"`
 }
 
 type AddCategory struct {
