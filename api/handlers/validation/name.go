@@ -22,7 +22,7 @@ func ValidateName(name string) error {
 		return errors.New(invalidStringErrorFormatted(name))
 	}
 
-	if len(name) >= 20 {
+	if len(name) > 20 {
 		return errors.New(nameTooLongErrorFormatted(name))
 	}
 

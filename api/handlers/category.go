@@ -6,8 +6,8 @@ import (
 	"lukedawe/hutchi/dtos/requests"
 	"lukedawe/hutchi/dtos/responses"
 	response_errors "lukedawe/hutchi/dtos/responses/errors"
+	"lukedawe/hutchi/handlers/validation"
 	"lukedawe/hutchi/models"
-	"lukedawe/hutchi/models/validation"
 	"lukedawe/hutchi/services"
 	"net/http"
 
@@ -187,7 +187,7 @@ func categoryRequestToModel(categoryRequest requests.AddCategory) models.Categor
 func validateAddCategoryRequest(request requests.AddCategory) error {
 	if err := validation.ValidateName(request.Name); err != nil {
 		response := response_errors.ErrBadRequestInvalidParam.SetError(err)
-		response.Message = "Category name `" + request.Name + "` is not valid." // User facing error message.
+		response.Message = err.Error() // Copy error message because it's user facing.
 		return response
 	}
 

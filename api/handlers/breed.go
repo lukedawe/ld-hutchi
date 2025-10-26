@@ -5,6 +5,8 @@ import (
 	"lukedawe/hutchi/dtos/requests"
 	"lukedawe/hutchi/dtos/responses"
 	"lukedawe/hutchi/dtos/responses/errors"
+	error_response "lukedawe/hutchi/dtos/responses/errors"
+	"lukedawe/hutchi/handlers/validation"
 	"lukedawe/hutchi/models"
 	"lukedawe/hutchi/services"
 	"net/http"
@@ -12,10 +14,41 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func (h *Handler) GetBreed(c *gin.Context) {
+	var request requests.GetBreed
+	if err := c.ShouldBindUri(&request); err != nil {
+		c.Error(error_response.ErrBadRequestBinding.SetError(err))
+		return
+	}
+
+	breeds, err := services.GetBreeds(h.DB, c, request.Name)
+	if err != nil {
+		c.Error(services.TranslateDbError(err))
+		return
+	}
+
+	response := make([]responses.BreedWithCategory, len(breeds))
+	for i, breed := range breeds {
+		response[i] = responses.BreedWithCategory{
+			Name:     breed.Name,
+			Category: breed.Category.Name,
+		}
+	}
+
+	log.Println("Got breed: ", response)
+
+	c.JSON(http.StatusOK, response)
+}
+
 func (h *Handler) AddBreed(c *gin.Context) {
 	var request requests.AddBreed
 	if err := c.ShouldBindBodyWithJSON(&request); err != nil {
 		c.Error(errors.ErrBadRequestBinding.SetError(err))
+		return
+	}
+
+	if err := validateAddBreedStruct(request); err != nil {
+		c.Error(err)
 		return
 	}
 
@@ -45,28 +78,12 @@ func (h *Handler) AddBreed(c *gin.Context) {
 	c.JSON(http.StatusCreated, response)
 }
 
-func (h *Handler) GetBreed(c *gin.Context) {
-	var request requests.GetBreed
-	if err := c.ShouldBindUri(&request); err != nil {
-		c.Error(errors.ErrBadRequestBinding.SetError(err))
-		return
+// Validates the `AddBreed` struct and returns a user-facing response if it's not valid.
+func validateAddBreedStruct(breed requests.AddBreed) error {
+	if err := validation.ValidateName(breed.Name); err != nil {
+		response := error_response.ErrBadRequestInvalidParam.SetError(err)
+		response.Message = err.Error()
+		return response
 	}
-
-	breeds, err := services.GetBreeds(h.DB, c, request.Name)
-	if err != nil {
-		c.Error(services.TranslateDbError(err))
-		return
-	}
-
-	response := make([]responses.BreedWithCategory, len(breeds))
-	for i, breed := range breeds {
-		response[i] = responses.BreedWithCategory{
-			Name:     breed.Name,
-			Category: breed.Category.Name,
-		}
-	}
-
-	log.Println("Got breed: ", response)
-
-	c.JSON(http.StatusOK, response)
+	return nil
 }

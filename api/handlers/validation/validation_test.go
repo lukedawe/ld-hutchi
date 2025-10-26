@@ -76,6 +76,11 @@ func TestNameValidation(t *testing.T) {
 			input:   "saint-bernard",
 			wantErr: true,
 		},
+		{
+			name:    "Fail: Name Too Long (more than 20 chars)",
+			input:   "tooooooooooooooooooooolongggggggggggggggggggggggggg",
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range tests {
