@@ -25,3 +25,11 @@ type GetCategory struct {
 type GetCategoryToBreeds struct {
 	Name string `uri:"name" binding:"required"`
 }
+
+type PutCategoryUri struct {
+	Name string `uri:"name" binding:"required"`
+}
+
+type PutCategoryBody struct {
+	Breeds []Breed `json:"breeds" binding:"required"`
+}

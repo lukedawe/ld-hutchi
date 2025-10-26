@@ -5,7 +5,7 @@ import (
 )
 
 // **Gemini generated** table test cases.
-func TestNameValidation(t *testing.T) {
+func TestCategoryNameValidation(t *testing.T) {
 	tests := []struct {
 		name    string
 		input   string
@@ -85,7 +85,7 @@ func TestNameValidation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := ValidateName(tt.input)
+			err := ValidateCategoryName(tt.input)
 
 			// 1. Check for expected error state (presence or absence of error)
 			if (err != nil) != tt.wantErr {

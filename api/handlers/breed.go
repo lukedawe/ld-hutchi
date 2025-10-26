@@ -40,7 +40,7 @@ func (h *Handler) GetBreed(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-func (h *Handler) AddBreed(c *gin.Context) {
+func (h *Handler) PostBreed(c *gin.Context) {
 	var request requests.AddBreed
 	if err := c.ShouldBindBodyWithJSON(&request); err != nil {
 		c.Error(errors.ErrBadRequestBinding.SetError(err))
@@ -80,7 +80,7 @@ func (h *Handler) AddBreed(c *gin.Context) {
 
 // Validates the `AddBreed` struct and returns a user-facing response if it's not valid.
 func validateAddBreedStruct(breed requests.AddBreed) error {
-	if err := validation.ValidateName(breed.Name); err != nil {
+	if err := validation.ValidateBreedName(breed.Name); err != nil {
 		response := error_response.ErrBadRequestInvalidParam.SetError(err)
 		response.Message = err.Error()
 		return response

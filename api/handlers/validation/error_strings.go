@@ -1,7 +1,7 @@
 package validation
 
 const (
-	emptyNameErrorMessage = "Empty name provided."
+	emptyNameErrorMessage = "empty name provided"
 )
 
 func invalidStringErrorFormatted(name string) string {

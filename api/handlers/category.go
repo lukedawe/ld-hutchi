@@ -90,7 +90,7 @@ func (h *Handler) GetCategoryToBreeds(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-func (h *Handler) AddCategory(c *gin.Context) {
+func (h *Handler) PostCategory(c *gin.Context) {
 	var request requests.AddCategory
 	if err := c.ShouldBindBodyWithJSON(&request); err != nil {
 		c.Error(response_errors.ErrBadRequestBinding.SetError(err))
@@ -111,7 +111,7 @@ func (h *Handler) AddCategory(c *gin.Context) {
 	}
 
 	// Send to the database
-	if err := services.CreateCategory(h.DB, c, &categoryModel); err != nil {
+	if err := services.CreateCategory(h.DB, c, categoryModel); err != nil {
 		c.Error(services.TranslateDbError(err))
 		return
 	}
@@ -120,7 +120,7 @@ func (h *Handler) AddCategory(c *gin.Context) {
 	c.JSON(http.StatusCreated, response)
 }
 
-func (h *Handler) AddCategories(c *gin.Context) {
+func (h *Handler) PostCategories(c *gin.Context) {
 	var request requests.AddCategories
 	if err := c.ShouldBindBodyWithJSON(&request); err != nil {
 		c.Error(response_errors.ErrBadRequestBinding.SetError(err))
@@ -156,6 +156,43 @@ func (h *Handler) AddCategories(c *gin.Context) {
 	c.JSON(http.StatusCreated, response)
 }
 
+func (h *Handler) PutCategory(c *gin.Context) {
+	var uri requests.PutCategoryUri
+	if err := c.ShouldBindUri(&uri); err != nil {
+		c.Error(response_errors.ErrBadRequestBinding.SetError(err))
+		return
+	}
+
+	var body requests.PutCategoryBody
+	if err := c.ShouldBindBodyWithJSON(&body); err != nil {
+		c.Error(response_errors.ErrBadRequestInvalidJSON.SetError(err))
+		return
+	}
+
+	if err := validatePutCategoryRequestUri(uri); err != nil {
+		c.Error(err)
+		return
+	}
+
+	if err := validatePutCategoryRequestBody(body); err != nil {
+		c.Error(err)
+		return
+	}
+
+	categoryModel := models.Category{Name: uri.Name}
+	categoryModel.Breeds = make([]models.Breed, len(body.Breeds))
+	for i, breed := range body.Breeds {
+		categoryModel.Breeds[i] = models.Breed{
+			Name: breed.Name,
+		}
+	}
+
+	if err := services.UpsertCategory(h.DB, c, categoryModel); err != nil {
+		c.Error(services.TranslateDbError(err))
+		return
+	}
+}
+
 // Helper functions for conversion between the DB model and the responses.
 func categoryModelToResponse(categoryModel models.Category) responses.CategoryCreated {
 	breeds := make([]responses.CategoryBreed, len(categoryModel.Breeds))
@@ -185,7 +222,7 @@ func categoryRequestToModel(categoryRequest requests.AddCategory) models.Categor
 
 // Validates the add category request and returns nil or response-ready error.
 func validateAddCategoryRequest(request requests.AddCategory) error {
-	if err := validation.ValidateName(request.Name); err != nil {
+	if err := validation.ValidateCategoryName(request.Name); err != nil {
 		response := response_errors.ErrBadRequestInvalidParam.SetError(err)
 		response.Message = err.Error() // Copy error message because it's user facing.
 		return response
@@ -193,11 +230,26 @@ func validateAddCategoryRequest(request requests.AddCategory) error {
 
 	var err error
 	for _, breed := range request.Breeds {
-		err = errors.Join(validation.ValidateName(breed.Name))
+		err = errors.Join(validation.ValidateBreedName(breed.Name))
 	}
 	if err != nil {
 		return err
 	}
 
+	return nil
+}
+
+func validatePutCategoryRequestUri(uri requests.PutCategoryUri) error {
+	return validation.ValidateCategoryName(uri.Name)
+}
+
+func validatePutCategoryRequestBody(body requests.PutCategoryBody) error {
+	var err error
+	for _, breed := range body.Breeds {
+		err = errors.Join(validation.ValidateBreedName(breed.Name))
+	}
+	if err != nil {
+		return err
+	}
 	return nil
 }
