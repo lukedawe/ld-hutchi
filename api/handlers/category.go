@@ -1,11 +1,13 @@
 package handlers
 
 import (
+	"errors"
 	"log"
 	"lukedawe/hutchi/dtos/requests"
 	"lukedawe/hutchi/dtos/responses"
-	"lukedawe/hutchi/dtos/responses/errors"
+	response_errors "lukedawe/hutchi/dtos/responses/errors"
 	"lukedawe/hutchi/models"
+	"lukedawe/hutchi/models/validation"
 	"lukedawe/hutchi/services"
 	"net/http"
 
@@ -31,7 +33,7 @@ func (h *Handler) GetCategories(c *gin.Context) {
 func (h *Handler) GetCategoriesToBreeds(c *gin.Context) {
 	var request requests.GetCategoriesToBreeds
 	if err := c.ShouldBindUri(&request); err != nil {
-		c.Error(errors.ErrBadRequestBinding.SetError(err))
+		c.Error(response_errors.ErrBadRequestBinding.SetError(err))
 		return
 	}
 
@@ -52,7 +54,7 @@ func (h *Handler) GetCategoriesToBreeds(c *gin.Context) {
 func (h *Handler) GetCategory(c *gin.Context) {
 	var request requests.GetCategory
 	if err := c.ShouldBindUri(&request); err != nil {
-		c.Error(errors.ErrBadRequestBinding.SetError(err))
+		c.Error(response_errors.ErrBadRequestBinding.SetError(err))
 		return
 	}
 
@@ -70,7 +72,7 @@ func (h *Handler) GetCategory(c *gin.Context) {
 func (h *Handler) GetCategoryToBreeds(c *gin.Context) {
 	var request requests.GetCategoryToBreeds
 	if err := c.ShouldBindUri(&request); err != nil {
-		c.Error(errors.ErrBadRequestBinding.SetError(err))
+		c.Error(response_errors.ErrBadRequestBinding.SetError(err))
 		return
 	}
 
@@ -91,7 +93,12 @@ func (h *Handler) GetCategoryToBreeds(c *gin.Context) {
 func (h *Handler) AddCategory(c *gin.Context) {
 	var request requests.AddCategory
 	if err := c.ShouldBindBodyWithJSON(&request); err != nil {
-		c.Error(errors.ErrBadRequestBinding.SetError(err))
+		c.Error(response_errors.ErrBadRequestBinding.SetError(err))
+		return
+	}
+
+	if err := validateAddCategoryRequest(request); err != nil {
+		c.Error(err)
 		return
 	}
 
@@ -102,6 +109,7 @@ func (h *Handler) AddCategory(c *gin.Context) {
 			Name: breed.Name,
 		}
 	}
+
 	// Send to the database
 	if err := services.CreateCategory(h.DB, c, &categoryModel); err != nil {
 		c.Error(services.TranslateDbError(err))
@@ -115,7 +123,17 @@ func (h *Handler) AddCategory(c *gin.Context) {
 func (h *Handler) AddCategories(c *gin.Context) {
 	var request requests.AddCategories
 	if err := c.ShouldBindBodyWithJSON(&request); err != nil {
-		c.Error(errors.ErrBadRequestBinding.SetError(err))
+		c.Error(response_errors.ErrBadRequestBinding.SetError(err))
+		return
+	}
+
+	// Validate each category individually.
+	var err error
+	for _, category := range request.Categories {
+		err = errors.Join(validateAddCategoryRequest(category))
+	}
+	if err != nil {
+		c.Error(err)
 		return
 	}
 
@@ -138,7 +156,7 @@ func (h *Handler) AddCategories(c *gin.Context) {
 	c.JSON(http.StatusCreated, response)
 }
 
-// Helper functions for conversion between the DB model and the responses
+// Helper functions for conversion between the DB model and the responses.
 func categoryModelToResponse(categoryModel models.Category) responses.CategoryCreated {
 	breeds := make([]responses.CategoryBreed, len(categoryModel.Breeds))
 	for i, breed := range categoryModel.Breeds {
@@ -163,4 +181,23 @@ func categoryRequestToModel(categoryRequest requests.AddCategory) models.Categor
 		Name:   categoryRequest.Name,
 		Breeds: breeds,
 	}
+}
+
+// Validates the add category request and returns nil or response-ready error.
+func validateAddCategoryRequest(request requests.AddCategory) error {
+	if err := validation.ValidateName(request.Name); err != nil {
+		response := response_errors.ErrBadRequestInvalidParam.SetError(err)
+		response.Message = "Category name `" + request.Name + "` is not valid." // User facing error message.
+		return response
+	}
+
+	var err error
+	for _, breed := range request.Breeds {
+		err = errors.Join(validation.ValidateName(breed.Name))
+	}
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

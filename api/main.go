@@ -80,19 +80,23 @@ func setupRouter(DB *sql.DB) *gin.Engine {
 	v1 := r.Group("/v1")
 
 	v1.GET("/breeds/categories/:page/:page_size", h.GetCategoriesToBreeds) // Get all categories mapped to breeds (paginated).
-	v1.GET("/categories", h.GetCategories)                                 // Get all categories.
+	v1.GET("/categories", h.GetCategories)                                 // Get all categories (without breed information).
 	v1.GET("/category/:name", h.GetCategory)                               // Get the category for a category name.
 	v1.GET("/category/:name/breeds", h.GetCategoryToBreeds)                // Get all the breeds for a particular breed.
-	v1.GET("/breed/:name", h.GetBreed)                                     // Get a particular breed.
-	v1.POST("/category", h.AddCategory)                                    // Add a category.
-	v1.POST("/breed", h.AddBreed)                                          // Add a breed.
-	v1.POST("/categories", h.AddCategories)                                // Batch add categories.
-	v1.PUT("/categories")                                                  // Batch add categories (idempotent).
-	v1.PUT("/breeds")                                                      // Batch add breeds (idempotent).
-	v1.PATCH("/category/:name")                                            // Update a category.
-	v1.PATCH("/breed/:name")                                               // Update a breed.
-	v1.DELETE("/breed")                                                    // Delete a breed.
-	v1.DELETE("/category")                                                 // Delete a category.
+	v1.GET("/breeds/:name", h.GetBreed)                                    // Get all breeds with a particular name.
+
+	v1.POST("/category", h.AddCategory)     // Add a category.
+	v1.POST("/breed", h.AddBreed)           // Add a breed.
+	v1.POST("/categories", h.AddCategories) // Batch add categories.
+
+	v1.PUT("/category/:name") // Create or replace category.
+	v1.PUT("/breeds/:name")   // Create or replace breed.
+
+	v1.PATCH("/category/:name") // Update a category.
+	v1.PATCH("/breed/:name")    // Update a breed.
+
+	v1.DELETE("/breed")    // Delete a breed.
+	v1.DELETE("/category") // Delete a category.
 
 	return r
 }
