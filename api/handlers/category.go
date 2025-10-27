@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"errors"
 	"log"
 	"lukedawe/hutchi/handlers/dtos/requests"
 	"lukedawe/hutchi/handlers/dtos/responses"
@@ -126,13 +125,8 @@ func (h *Handler) PostCategories(c *gin.Context) {
 		return
 	}
 
-	// Validate each category individually.
-	var err error
-	for _, category := range request.Categories {
-		err = errors.Join(category.Validate())
-	}
-	if err != nil {
-		c.Error(err)
+	if err := request.Validate(); err != nil {
+		c.Error(response_errors.ErrBadRequestValidation.SetError(err))
 		return
 	}
 
@@ -173,7 +167,7 @@ func (h *Handler) PutCategory(c *gin.Context) {
 		return
 	}
 
-	categoryModel := models.Category{Name: uri.Name}
+	categoryModel := models.Category{Name: body.Name}
 	categoryModel.Breeds = make([]models.Breed, len(body.Breeds))
 	for i, breed := range body.Breeds {
 		categoryModel.Breeds[i] = models.Breed{

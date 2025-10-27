@@ -2,10 +2,12 @@ package services
 
 import (
 	"context"
+	"errors"
 	"lukedawe/hutchi/models"
 	"lukedawe/hutchi/services/scopes"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 func GetCategories(db *gorm.DB, c context.Context) ([]models.Category, error) {
@@ -36,53 +38,73 @@ func CreateCategories(db *gorm.DB, c context.Context, category []models.Category
 }
 
 /*
-At the moment this is redundant, because we are finding the category by name, and then
-only updating the name (basically a no-op), but in the future if there is more data, then
-we will want to upsert the data.
-
 GORM performs all single operations as a transaction, but this will require a few
 operations to be performed.
 */
-func UpsertCategory(db *gorm.DB, c context.Context, category models.Category, oldName string) error {
-	// Begin transaction (this will cover a few queries that we must perform).
+func UpsertCategory(db *gorm.DB, c context.Context, upsertCat models.Category, oldName string) error {
+	// Begin transaction (this will cover a couple of queries that we must perform).
 	return db.
 		WithContext(c).
 		Transaction(func(tx *gorm.DB) error {
+			oldCategory, err := gorm.G[models.Category](tx).Where("name = ?", oldName).First(c)
+			if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+				return err
+			}
 
-			// oldCategory, err := gorm.G[models.Category](tx).Where("name = ?", oldName).First(c)
-			// if err != nil {
-			// 	// Error can be ignored if it's only saying that a record was not found.
-			// 	if !errors.Is(err, gorm.ErrRecordNotFound) {
-			// 		return err
-			// 	}
-			// }
+			// This could still be 0 iff the category does not already exist.
+			upsertCat.ID = oldCategory.ID
 
-			// // TODO: https://stackoverflow.com/questions/77935191/how-to-upsert-a-gorm-model-with-its-association
+			err = tx.
+				Clauses(
+					clause.OnConflict{
+						Columns:   []clause.Column{{Name: "id"}},
+						UpdateAll: true,
+					}).
+				Create(&upsertCat).Error
 
-			// if err := gorm.G[models.Category](
-			// 	tx.
-			// 		Clauses(clause.OnConflict{
-			// 			Columns:   []clause.Column{{Name: "name"}},
-			// 			DoUpdates: clause.AssignmentColumns([]string{"name"}), // Upsert data.
-			// 		})).
-			// 	Create(c, &category); err != nil {
-			// 	return err
-			// }
+			if err != nil {
+				return err
+			}
 
-			// if err := tx.
-			// 	Model(category).
-			// 	Association("breeds").
-			// 	Clear(); err != nil {
-			// 	return err
-			// }
-
-			// // TODO: Make this idempotent!
-			// if err := tx.Model(category).
-			// 	Association("breeds").
-			// 	Append(category.Breeds); err != nil {
-			// 	return err
-			// }
-
-			return nil
+			return tx.
+				Model(&upsertCat).
+				Unscoped().
+				Association("Breeds").
+				Unscoped().
+				Replace(upsertCat.Breeds)
 		})
 }
+
+// end try again
+
+// // Unscoped means that replace acts to remove the associated records instead of only the foreign key.
+// replaceCat, err := gorm.G[models.Category](tx).Where("name = ?", oldName).First(c)
+
+// if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+// 	return err
+// }
+
+// upsertCat.ID = replaceCat.ID
+
+// // Delete associated breed records
+// err = tx.Model(&replaceCat).
+// 	Unscoped().
+// 	Association("breeds").
+// 	Unscoped().
+// 	Replace(upsertCat.Breeds)
+
+// if err != nil {
+// 	return nil
+// }
+// // Now we have replaced the associations, time to replace the name in case the name has changed.
+// tx.
+// 	Clauses(clause.OnConflict{
+// 		UpdateAll: true,
+// 	}).
+// 	Create(&upsertCat).
+// 	Save(&upsertCat)
+
+// return nil
+// 		}
+// 		)
+// }

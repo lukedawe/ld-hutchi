@@ -38,6 +38,19 @@ func (input *CategoryNameRequiredJson) ValidateCategoryNameRequiredJson() error 
 	return ValidateCategoryName(input.Name)
 }
 
+func (request *AddCategories) Validate() error {
+	// Validate each category individually.
+	var err error
+	for _, category := range request.Categories {
+		err = errors.Join(category.Validate())
+	}
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Validates the add category request and returns nil or response-ready error.
 func (request *AddCategory) Validate() error {
 	if err := request.ValidateCategoryNameRequiredJson(); err != nil {

@@ -12,7 +12,6 @@ func ErrorHandler() gin.HandlerFunc {
 		ctx.Next() // Process the request.
 
 		if len(ctx.Errors) > 0 {
-
 			log.Println("Error detected.")
 
 			err := ctx.Errors.Last().Err
