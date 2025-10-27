@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"log"
-	"lukedawe/hutchi/dtos/responses/errors"
+	"lukedawe/hutchi/handlers/dtos/responses/errors"
 
 	"github.com/gin-gonic/gin"
 )

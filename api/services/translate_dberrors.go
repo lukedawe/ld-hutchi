@@ -3,7 +3,7 @@ package services
 import (
 	"errors"
 	"log"
-	lde "lukedawe/hutchi/dtos/responses/errors"
+	lde "lukedawe/hutchi/handlers/dtos/responses/errors"
 
 	"context"
 

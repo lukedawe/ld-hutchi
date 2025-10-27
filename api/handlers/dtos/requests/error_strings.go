@@ -1,4 +1,4 @@
-package validation
+package requests
 
 const (
 	emptyNameErrorMessage = "empty name provided"

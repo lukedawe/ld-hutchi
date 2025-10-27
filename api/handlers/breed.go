@@ -2,11 +2,10 @@ package handlers
 
 import (
 	"log"
-	"lukedawe/hutchi/dtos/requests"
-	"lukedawe/hutchi/dtos/responses"
-	"lukedawe/hutchi/dtos/responses/errors"
-	error_response "lukedawe/hutchi/dtos/responses/errors"
-	"lukedawe/hutchi/handlers/validation"
+	"lukedawe/hutchi/handlers/dtos/requests"
+	"lukedawe/hutchi/handlers/dtos/responses"
+	"lukedawe/hutchi/handlers/dtos/responses/errors"
+	error_responses "lukedawe/hutchi/handlers/dtos/responses/errors"
 	"lukedawe/hutchi/models"
 	"lukedawe/hutchi/services"
 	"net/http"
@@ -17,7 +16,7 @@ import (
 func (h *Handler) GetBreed(c *gin.Context) {
 	var request requests.GetBreed
 	if err := c.ShouldBindUri(&request); err != nil {
-		c.Error(error_response.ErrBadRequestBinding.SetError(err))
+		c.Error(error_responses.ErrBadRequestBinding.SetError(err))
 		return
 	}
 
@@ -47,7 +46,7 @@ func (h *Handler) PostBreed(c *gin.Context) {
 		return
 	}
 
-	if err := validateAddBreedStruct(request); err != nil {
+	if err := request.Validate(); err != nil {
 		c.Error(err)
 		return
 	}
@@ -76,14 +75,4 @@ func (h *Handler) PostBreed(c *gin.Context) {
 
 	// Create the response
 	c.JSON(http.StatusCreated, response)
-}
-
-// Validates the `AddBreed` struct and returns a user-facing response if it's not valid.
-func validateAddBreedStruct(breed requests.AddBreed) error {
-	if err := validation.ValidateBreedName(breed.Name); err != nil {
-		response := error_response.ErrBadRequestInvalidParam.SetError(err)
-		response.Message = err.Error()
-		return response
-	}
-	return nil
 }

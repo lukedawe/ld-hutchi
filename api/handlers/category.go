@@ -3,10 +3,9 @@ package handlers
 import (
 	"errors"
 	"log"
-	"lukedawe/hutchi/dtos/requests"
-	"lukedawe/hutchi/dtos/responses"
-	response_errors "lukedawe/hutchi/dtos/responses/errors"
-	"lukedawe/hutchi/handlers/validation"
+	"lukedawe/hutchi/handlers/dtos/requests"
+	"lukedawe/hutchi/handlers/dtos/responses"
+	response_errors "lukedawe/hutchi/handlers/dtos/responses/errors"
 	"lukedawe/hutchi/models"
 	"lukedawe/hutchi/services"
 	"net/http"
@@ -97,7 +96,7 @@ func (h *Handler) PostCategory(c *gin.Context) {
 		return
 	}
 
-	if err := validateAddCategoryRequest(request); err != nil {
+	if err := request.Validate(); err != nil {
 		c.Error(err)
 		return
 	}
@@ -130,7 +129,7 @@ func (h *Handler) PostCategories(c *gin.Context) {
 	// Validate each category individually.
 	var err error
 	for _, category := range request.Categories {
-		err = errors.Join(validateAddCategoryRequest(category))
+		err = errors.Join(category.Validate())
 	}
 	if err != nil {
 		c.Error(err)
@@ -169,12 +168,7 @@ func (h *Handler) PutCategory(c *gin.Context) {
 		return
 	}
 
-	if err := validatePutCategoryRequestUri(uri); err != nil {
-		c.Error(err)
-		return
-	}
-
-	if err := validatePutCategoryRequestBody(body); err != nil {
+	if err := body.Validate(); err != nil {
 		c.Error(err)
 		return
 	}
@@ -187,7 +181,7 @@ func (h *Handler) PutCategory(c *gin.Context) {
 		}
 	}
 
-	if err := services.UpsertCategory(h.DB, c, categoryModel); err != nil {
+	if err := services.UpsertCategory(h.DB, c, categoryModel, uri.Name); err != nil {
 		c.Error(services.TranslateDbError(err))
 		return
 	}
@@ -218,38 +212,4 @@ func categoryRequestToModel(categoryRequest requests.AddCategory) models.Categor
 		Name:   categoryRequest.Name,
 		Breeds: breeds,
 	}
-}
-
-// Validates the add category request and returns nil or response-ready error.
-func validateAddCategoryRequest(request requests.AddCategory) error {
-	if err := validation.ValidateCategoryName(request.Name); err != nil {
-		response := response_errors.ErrBadRequestInvalidParam.SetError(err)
-		response.Message = err.Error() // Copy error message because it's user facing.
-		return response
-	}
-
-	var err error
-	for _, breed := range request.Breeds {
-		err = errors.Join(validation.ValidateBreedName(breed.Name))
-	}
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func validatePutCategoryRequestUri(uri requests.PutCategoryUri) error {
-	return validation.ValidateCategoryName(uri.Name)
-}
-
-func validatePutCategoryRequestBody(body requests.PutCategoryBody) error {
-	var err error
-	for _, breed := range body.Breeds {
-		err = errors.Join(validation.ValidateBreedName(breed.Name))
-	}
-	if err != nil {
-		return err
-	}
-	return nil
 }
