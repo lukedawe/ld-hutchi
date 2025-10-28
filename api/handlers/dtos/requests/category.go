@@ -24,17 +24,13 @@ type BreedArrayRequired struct {
 	Breeds []Breed `json:"breeds" binding:"required"`
 }
 
-type CategoryArrayRequired struct {
-	Categories []AddCategory `json:"categories"`
-}
-
-type AddCategory struct {
+type AddCategoryJson struct {
 	CategoryNameRequiredJson
 	BreedArrayRequired
 }
 
 type AddCategories struct {
-	CategoryArrayRequired
+	Categories []AddCategoryJson `json:"categories"`
 }
 
 type GetCategoriesToBreeds struct {
@@ -51,9 +47,4 @@ type GetCategoryToBreeds struct {
 
 type PutCategoryUri struct {
 	CategoryIdOptionalUri
-}
-
-type PutCategoryBody struct {
-	CategoryNameRequiredJson
-	BreedArrayRequired
 }

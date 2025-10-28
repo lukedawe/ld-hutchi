@@ -1,7 +1,8 @@
 package responses
 
 type CategoryBreed struct {
-	Name string
+	Id   uint   `json:"id"`
+	Name string `json:"name"`
 }
 
 type CategoryCreated struct {

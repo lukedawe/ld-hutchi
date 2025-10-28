@@ -89,7 +89,7 @@ func (h *Handler) GetCategoryToBreeds(c *gin.Context) {
 }
 
 func (h *Handler) PostCategory(c *gin.Context) {
-	var request requests.AddCategory
+	var request requests.AddCategoryJson
 	if err := c.ShouldBindBodyWithJSON(&request); err != nil {
 		c.Error(response_errors.ErrBadRequestBinding.SetError(err))
 		return
@@ -100,14 +100,7 @@ func (h *Handler) PostCategory(c *gin.Context) {
 		return
 	}
 
-	categoryModel := models.Category{Name: request.Name}
-	categoryModel.Breeds = make([]models.Breed, len(request.Breeds))
-	for i, breed := range request.Breeds {
-		categoryModel.Breeds[i] = models.Breed{
-			Name: breed.Name,
-		}
-	}
-
+	categoryModel := addCategoryRequestToModel(request)
 	// Send to the database
 	if err := services.CreateCategory(h.DB, c, categoryModel); err != nil {
 		c.Error(services.TranslateDbError(err))
@@ -132,7 +125,7 @@ func (h *Handler) PostCategories(c *gin.Context) {
 
 	categoryModels := make([]models.Category, len(request.Categories))
 	for i, category := range request.Categories {
-		categoryModels[i] = categoryRequestToModel(category)
+		categoryModels[i] = addCategoryRequestToModel(category)
 	}
 
 	if err := services.CreateCategories(h.DB, c, categoryModels); err != nil {
@@ -156,7 +149,7 @@ func (h *Handler) PutCategory(c *gin.Context) {
 		return
 	}
 
-	var body requests.PutCategoryBody
+	var body requests.AddCategoryJson
 	if err := c.ShouldBindBodyWithJSON(&body); err != nil {
 		c.Error(response_errors.ErrBadRequestInvalidJSON.SetError(err))
 		return
@@ -167,20 +160,54 @@ func (h *Handler) PutCategory(c *gin.Context) {
 		return
 	}
 
-	categoryModel := models.Category{Name: body.Name, ID: uri.Id}
-	categoryModel.Breeds = make([]models.Breed, len(body.Breeds))
-	for i, breed := range body.Breeds {
-		categoryModel.Breeds[i] = models.Breed{
-			Name: breed.Name,
-		}
-	}
+	categoryModel := addCategoryRequestToModel(body)
+	categoryModel.ID = uri.Id
 
 	if err := services.UpsertCategory(h.DB, c, &categoryModel); err != nil {
 		c.Error(services.TranslateDbError(err))
 		return
 	}
 
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusCreated, categoryModelToResponse(categoryModel))
+}
+
+func (h *Handler) PutBreed(c *gin.Context) {
+	var uri requests.PutBreedUri
+	if err := c.ShouldBindUri(&uri); err != nil {
+		c.Error(response_errors.ErrBadRequestInvalidParam.SetError(err))
+		return
+	}
+
+	// NOTE: For time's sake I'm reusing the AddBreed request because they are
+	//	going to be the same, but really this should have it's own struct.
+	var body requests.AddBreed
+	if err := c.ShouldBindBodyWithJSON(body); err != nil {
+		c.Error(response_errors.ErrBadRequestInvalidJSON.SetError(err))
+		return
+	}
+
+	if err := body.Validate(); err != nil {
+		c.Error(response_errors.ErrBadRequestInvalidJSON.SetError(err))
+		return
+	}
+
+	model := models.Breed{Name: body.Name, ID: uri.Id, CategoryID: body.CategoryId}
+
+	if err := services.UpsertBreed(h.DB, c, model); err != nil {
+		c.Error(services.TranslateDbError(err))
+		return
+	}
+
+	response := breedModelToResponse(model)
+	c.JSON(http.StatusCreated, response)
+}
+
+func breedModelToResponse(model models.Breed) responses.BreedCreated {
+	return responses.BreedCreated{
+		Id:         model.ID,
+		Name:       model.Name,
+		CategoryId: model.CategoryID,
+	}
 }
 
 // Helper functions for conversion between the DB model and the responses.
@@ -188,24 +215,23 @@ func categoryModelToResponse(categoryModel models.Category) responses.CategoryCr
 	breeds := make([]responses.CategoryBreed, len(categoryModel.Breeds))
 	for i, breed := range categoryModel.Breeds {
 		breeds[i].Name = breed.Name
+		breeds[i].Id = breed.ID
 	}
 
 	return responses.CategoryCreated{
 		Name:   categoryModel.Name,
 		Breeds: breeds,
+		Id:     categoryModel.ID,
 	}
 }
 
-func categoryRequestToModel(categoryRequest requests.AddCategory) models.Category {
-	breeds := make([]models.Breed, len(categoryRequest.Breeds))
-	for j, breed := range categoryRequest.Breeds {
-		breeds[j] = models.Breed{
+func addCategoryRequestToModel(body requests.AddCategoryJson) models.Category {
+	model := models.Category{Name: body.Name}
+	model.Breeds = make([]models.Breed, len(body.Breeds))
+	for i, breed := range body.Breeds {
+		model.Breeds[i] = models.Breed{
 			Name: breed.Name,
 		}
 	}
-
-	return models.Category{
-		Name:   categoryRequest.Name,
-		Breeds: breeds,
-	}
+	return model
 }

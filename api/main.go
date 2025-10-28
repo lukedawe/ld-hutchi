@@ -96,8 +96,10 @@ func setupRouter(DB *sql.DB) *gin.Engine {
 	v1.POST("/breed", h.PostBreed)           // Add a breed.
 	v1.POST("/categories", h.PostCategories) // Batch add categories.
 
-	v1.PUT("/category/*id", h.PutCategory) // Upsert category.
-	v1.PUT("/breed/*id")                   // Upsert breed.
+	v1.PUT("/category/:id", h.PutCategory) // Upsert category.
+	v1.PUT("/category", h.PutCategory)     // Upsert category.
+	v1.PUT("/breed/:id")                   // Upsert breed.
+	v1.PUT("/breed")                       // Upsert breed.
 
 	v1.PATCH("/category/:id") // Update a category.
 	v1.PATCH("/breed/:id")    // Update a breed.

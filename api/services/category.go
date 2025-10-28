@@ -24,7 +24,6 @@ func GetCategoryById(db *gorm.DB, c context.Context, id uint) (models.Category, 
 	return gorm.G[models.Category](db).
 		Preload("Breeds", nil).
 		Where("id = ?", id).
-		// This is OK because the name is unique in the database.
 		First(c)
 }
 
@@ -67,7 +66,7 @@ func UpsertCategory(db *gorm.DB, c context.Context, upsertCat *models.Category) 
 		})
 }
 
-func UpsertBreed(db *gorm.DB, c context.Context, upsertBreed models.Breed, categoryUuid string) error {
+func UpsertBreed(db *gorm.DB, c context.Context, upsertBreed models.Breed) error {
 	return db.WithContext(c).Transaction(func(tx *gorm.DB) error {
 		return tx.Clauses(
 			clause.OnConflict{

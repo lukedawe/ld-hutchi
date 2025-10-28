@@ -11,9 +11,17 @@ type BreedIdRequiredUri struct {
 	Id uint `uri:"id" binding:"required"`
 }
 
+type BreedIdOptionalUri struct {
+	Id uint `uri:"id"`
+}
+
 type BreedCategoryIdRequiredJson struct {
 	// Avoid circular references.
 	CategoryId uint `json:"category_id" binding:"required"`
+}
+
+type GetBreed struct {
+	BreedIdRequiredUri
 }
 
 type AddBreed struct {
@@ -21,6 +29,6 @@ type AddBreed struct {
 	BreedCategoryIdRequiredJson
 }
 
-type GetBreed struct {
-	BreedIdRequiredUri
+type PutBreedUri struct {
+	BreedIdOptionalUri
 }

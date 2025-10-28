@@ -52,7 +52,7 @@ func (request *AddCategories) Validate() error {
 }
 
 // Validates the add category request and returns nil or response-ready error.
-func (request *AddCategory) Validate() error {
+func (request *AddCategoryJson) Validate() error {
 	if err := request.ValidateCategoryNameRequiredJson(); err != nil {
 		response := error_responses.ErrBadRequestInvalidParam.SetError(err)
 		response.Message = err.Error() // Copy error message because it's user facing.
@@ -69,24 +69,5 @@ func (request *AddCategory) Validate() error {
 		return response
 	}
 
-	return nil
-}
-
-func (body *PutCategoryBody) Validate() error {
-	if err := body.ValidateCategoryNameRequiredJson(); err != nil {
-		response := error_responses.ErrBadRequestInvalidParam.SetError(err)
-		response.Message = err.Error() // Copy error message because it's user facing.
-		return response
-	}
-
-	var err error
-	for _, breed := range body.Breeds {
-		err = errors.Join(breed.ValidateBreedNameRequiredJson())
-	}
-	if err != nil {
-		response := error_responses.ErrBadRequestInvalidParam.SetError(err)
-		response.Message = err.Error() // Copy error message because it's user facing.
-		return response
-	}
 	return nil
 }
