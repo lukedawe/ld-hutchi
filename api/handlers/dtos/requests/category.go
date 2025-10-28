@@ -56,3 +56,6 @@ type PatchCategoryUri struct {
 type PatchCategoryBody struct {
 	CategoryNameRequiredJson
 }
+type DeleteCategoryUri struct {
+	CategoryIdRequiredUri
+}

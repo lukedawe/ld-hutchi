@@ -1,0 +1,30 @@
+definitions:
+  responses.BreedWithCategory:
+    properties:
+      category:
+        type: string
+      name:
+        type: string
+    required:
+    - category
+    - name
+    type: object
+info:
+  contact: {}
+paths:
+  /breed:
+    get:
+      description: Get the breed by the ID.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/responses.BreedWithCategory'
+            type: array
+      summary: Get breed by ID.
+      tags:
+      - breeds
+swagger: "2.0"

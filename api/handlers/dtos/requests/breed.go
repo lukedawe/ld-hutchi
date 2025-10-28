@@ -40,3 +40,7 @@ type PatchBreedUri struct {
 type PatchBreedBody struct {
 	BreedNameRequiredJson
 }
+
+type DeleteBreedUri struct {
+	BreedIdRequiredUri
+}

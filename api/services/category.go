@@ -89,3 +89,15 @@ func UpdateCategoryName(db *gorm.DB, c context.Context, updatedCategory *models.
 		return nil
 	})
 }
+
+// This is OK because the delete will cascade to the breeds table.
+func DeleteCategory(db *gorm.DB, c context.Context, id uint) error {
+	rowsAffected, err := gorm.G[models.Category](db).Where("id = ?", id).Delete(c)
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
+}

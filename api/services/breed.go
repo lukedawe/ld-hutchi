@@ -45,7 +45,9 @@ func UpdateBreedName(db *gorm.DB, c context.Context, updatedBreed *models.Breed)
 			return gorm.ErrRecordNotFound
 		}
 
-		model, err := gorm.G[models.Breed](tx).Where("id = ?", updatedBreed.ID).First(c)
+		model, err := gorm.G[models.Breed](tx).
+			Where("id = ?", updatedBreed.ID).
+			First(c)
 
 		if err != nil {
 			return err
@@ -54,4 +56,15 @@ func UpdateBreedName(db *gorm.DB, c context.Context, updatedBreed *models.Breed)
 		updatedBreed = &model
 		return nil
 	})
+}
+
+func DeleteBreed(db *gorm.DB, c context.Context, id uint) error {
+	rowsAffected, err := gorm.G[models.Breed](db).Where("id = ?", id).Delete(c)
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
 }

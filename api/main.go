@@ -14,7 +14,15 @@ import (
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+
+	docs "lukedawe/hutchi/docs"
+
+	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
+	// swagger embed files
+	swaggerfiles "github.com/swaggo/files"
 )
+
+const v1Route = "v1"
 
 func connectDB(envFile string) *sql.DB {
 	if err := godotenv.Load(envFile); err != nil {
@@ -68,6 +76,7 @@ func setupRouter(DB *sql.DB) *gin.Engine {
 	r := gin.Default()
 	// Register middleware before roots
 	r.Use(handlers.ErrorHandler())
+	docs.SwaggerInfo.BasePath = v1Route
 
 	h := &handlers.Handler{DB: getGormDb(DB)}
 
@@ -77,7 +86,7 @@ func setupRouter(DB *sql.DB) *gin.Engine {
 		})
 	})
 
-	v1 := r.Group("/v1")
+	v1 := r.Group(v1Route)
 
 	/*
 		There are valid security concerns for this API. Using database ID's
@@ -85,6 +94,9 @@ func setupRouter(DB *sql.DB) *gin.Engine {
 		the data stored within the database is not sensitive, it makes querying a lot
 		easier.
 	*/
+
+	// Docs for the API
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	v1.GET("/breeds/categories/:page/:page_size", h.GetCategoriesToBreeds) // Get all categories mapped to breeds (paginated).
 	v1.GET("/categories", h.GetCategories)                                 // Get all categories (without breed information).
@@ -102,10 +114,10 @@ func setupRouter(DB *sql.DB) *gin.Engine {
 	v1.PUT("/breed", h.PutBreed)           // Upsert breed.
 
 	v1.PATCH("/category/:id", h.PatchCategory) // Update a category.
-	v1.PATCH("/breed/:id", h.patch)            // Update a breed.
+	v1.PATCH("/breed/:id", h.PatchBreed)       // Update a breed.
 
-	v1.DELETE("/breed/:id")    // Delete a breed.
-	v1.DELETE("/category/:id") // Delete a category.
+	v1.DELETE("/breed/:id", h.DeleteBreed)       // Delete a breed.
+	v1.DELETE("/category/:id", h.DeleteCategory) // Delete a category.
 
 	return r
 }
