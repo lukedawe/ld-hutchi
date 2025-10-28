@@ -74,37 +74,3 @@ func UpsertCategory(db *gorm.DB, c context.Context, upsertCat models.Category, o
 				Replace(upsertCat.Breeds)
 		})
 }
-
-// end try again
-
-// // Unscoped means that replace acts to remove the associated records instead of only the foreign key.
-// replaceCat, err := gorm.G[models.Category](tx).Where("name = ?", oldName).First(c)
-
-// if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-// 	return err
-// }
-
-// upsertCat.ID = replaceCat.ID
-
-// // Delete associated breed records
-// err = tx.Model(&replaceCat).
-// 	Unscoped().
-// 	Association("breeds").
-// 	Unscoped().
-// 	Replace(upsertCat.Breeds)
-
-// if err != nil {
-// 	return nil
-// }
-// // Now we have replaced the associations, time to replace the name in case the name has changed.
-// tx.
-// 	Clauses(clause.OnConflict{
-// 		UpdateAll: true,
-// 	}).
-// 	Create(&upsertCat).
-// 	Save(&upsertCat)
-
-// return nil
-// 		}
-// 		)
-// }
