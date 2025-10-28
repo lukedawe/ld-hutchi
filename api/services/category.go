@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"errors"
 	"lukedawe/hutchi/models"
 	"lukedawe/hutchi/services/scopes"
 
@@ -21,10 +20,10 @@ func GetCategoriesToBreeds(db *gorm.DB, c context.Context, page uint, pageSize u
 		Find(c)
 }
 
-func GetCategoryByName(db *gorm.DB, c context.Context, name string) (models.Category, error) {
+func GetCategoryById(db *gorm.DB, c context.Context, id uint) (models.Category, error) {
 	return gorm.G[models.Category](db).
 		Preload("Breeds", nil).
-		Where("name = ?", name).
+		Where("id = ?", id).
 		// This is OK because the name is unique in the database.
 		First(c)
 }
@@ -41,20 +40,12 @@ func CreateCategories(db *gorm.DB, c context.Context, category []models.Category
 GORM performs all single operations as a transaction, but this will require a few
 operations to be performed.
 */
-func UpsertCategory(db *gorm.DB, c context.Context, upsertCat models.Category, oldName string) error {
+func UpsertCategory(db *gorm.DB, c context.Context, upsertCat *models.Category) error {
 	// Begin transaction (this will cover a couple of queries that we must perform).
 	return db.
 		WithContext(c).
 		Transaction(func(tx *gorm.DB) error {
-			oldCategory, err := gorm.G[models.Category](tx).Where("name = ?", oldName).First(c)
-			if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-				return err
-			}
-
-			// This could still be 0 iff the category does not already exist.
-			upsertCat.ID = oldCategory.ID
-
-			err = tx.
+			err := tx.
 				Clauses(
 					clause.OnConflict{
 						Columns:   []clause.Column{{Name: "id"}},
@@ -66,6 +57,7 @@ func UpsertCategory(db *gorm.DB, c context.Context, upsertCat models.Category, o
 				return err
 			}
 
+			// Replace all the associated breeds.
 			return tx.
 				Model(&upsertCat).
 				Unscoped().
@@ -73,4 +65,15 @@ func UpsertCategory(db *gorm.DB, c context.Context, upsertCat models.Category, o
 				Unscoped().
 				Replace(upsertCat.Breeds)
 		})
+}
+
+func UpsertBreed(db *gorm.DB, c context.Context, upsertBreed models.Breed, categoryUuid string) error {
+	return db.WithContext(c).Transaction(func(tx *gorm.DB) error {
+		return tx.Clauses(
+			clause.OnConflict{
+				Columns:   []clause.Column{{Name: "id"}},
+				UpdateAll: true,
+			},
+		).Create(&upsertBreed).Error
+	})
 }

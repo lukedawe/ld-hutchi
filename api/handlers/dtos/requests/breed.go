@@ -7,20 +7,20 @@ type BreedNameRequiredJson struct {
 }
 
 // Same for Uri.
-type BreedNameRequiredUri struct {
-	Name string `uri:"name" binding:"required"`
+type BreedIdRequiredUri struct {
+	Id uint `uri:"id" binding:"required"`
 }
 
-type BreedCategoryNameRequiredJson struct {
+type BreedCategoryIdRequiredJson struct {
 	// Avoid circular references.
-	CategoryName string `json:"category_name" binding:"required"`
+	CategoryId uint `json:"category_id" binding:"required"`
 }
 
 type AddBreed struct {
 	BreedNameRequiredJson
-	BreedCategoryNameRequiredJson
+	BreedCategoryIdRequiredJson
 }
 
 type GetBreed struct {
-	BreedNameRequiredUri
+	BreedIdRequiredUri
 }

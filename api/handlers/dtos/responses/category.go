@@ -5,8 +5,9 @@ type CategoryBreed struct {
 }
 
 type CategoryCreated struct {
-	Name   string          `json:"name" binding:"required"`
-	Breeds []CategoryBreed `json:"breeds" binding:"required"`
+	Id     uint            `json:"id"`
+	Name   string          `json:"name"`
+	Breeds []CategoryBreed `json:"breeds"`
 }
 
 type CategoriesCreated struct {

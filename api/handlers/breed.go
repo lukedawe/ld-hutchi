@@ -20,7 +20,7 @@ func (h *Handler) GetBreed(c *gin.Context) {
 		return
 	}
 
-	breeds, err := services.GetBreeds(h.DB, c, request.Name)
+	breeds, err := services.GetBreeds(h.DB, c, request.Id)
 	if err != nil {
 		c.Error(services.TranslateDbError(err))
 		return
@@ -52,7 +52,7 @@ func (h *Handler) PostBreed(c *gin.Context) {
 	}
 
 	// Find the category
-	category, err := services.GetCategoryByName(h.DB, c, request.CategoryName)
+	category, err := services.GetCategoryById(h.DB, c, request.CategoryId)
 	if err != nil {
 		c.Error(services.TranslateDbError(err))
 		return

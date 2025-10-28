@@ -56,7 +56,7 @@ func (h *Handler) GetCategory(c *gin.Context) {
 		return
 	}
 
-	category, err := services.GetCategoryByName(h.DB, c, request.Name)
+	category, err := services.GetCategoryById(h.DB, c, request.Id)
 	if err != nil {
 		c.Error(services.TranslateDbError(err))
 		return
@@ -74,7 +74,7 @@ func (h *Handler) GetCategoryToBreeds(c *gin.Context) {
 		return
 	}
 
-	category, err := services.GetCategoryByName(h.DB, c, request.Name)
+	category, err := services.GetCategoryById(h.DB, c, request.Id)
 	if err != nil {
 		c.Error(services.TranslateDbError(err))
 		return
@@ -167,7 +167,7 @@ func (h *Handler) PutCategory(c *gin.Context) {
 		return
 	}
 
-	categoryModel := models.Category{Name: body.Name}
+	categoryModel := models.Category{Name: body.Name, ID: uri.Id}
 	categoryModel.Breeds = make([]models.Breed, len(body.Breeds))
 	for i, breed := range body.Breeds {
 		categoryModel.Breeds[i] = models.Breed{
@@ -175,10 +175,12 @@ func (h *Handler) PutCategory(c *gin.Context) {
 		}
 	}
 
-	if err := services.UpsertCategory(h.DB, c, categoryModel, uri.Name); err != nil {
+	if err := services.UpsertCategory(h.DB, c, &categoryModel); err != nil {
 		c.Error(services.TranslateDbError(err))
 		return
 	}
+
+	c.Status(http.StatusOK)
 }
 
 // Helper functions for conversion between the DB model and the responses.

@@ -79,24 +79,31 @@ func setupRouter(DB *sql.DB) *gin.Engine {
 
 	v1 := r.Group("/v1")
 
+	/*
+		There are valid security concerns for this API. Using database ID's
+		as unique resource identifiers is not best practice, but considering
+		the data stored within the database is not sensitive, it makes querying a lot
+		easier.
+	*/
+
 	v1.GET("/breeds/categories/:page/:page_size", h.GetCategoriesToBreeds) // Get all categories mapped to breeds (paginated).
 	v1.GET("/categories", h.GetCategories)                                 // Get all categories (without breed information).
-	v1.GET("/category/:name", h.GetCategory)                               // Get the category for a category name.
-	v1.GET("/category/:name/breeds", h.GetCategoryToBreeds)                // Get all the breeds for a particular breed.
-	v1.GET("/breeds/:name", h.GetBreed)                                    // Get all breeds with a particular name.
+	v1.GET("/category/:id", h.GetCategory)                                 // Get the category for a category name.
+	v1.GET("/categories/:id/breeds", h.GetCategoryToBreeds)                // Get all the breeds for a particular breed.
+	v1.GET("/breed/:id", h.GetBreed)                                       // Get all breeds with a particular name.
 
 	v1.POST("/category", h.PostCategory)     // Add a category.
 	v1.POST("/breed", h.PostBreed)           // Add a breed.
 	v1.POST("/categories", h.PostCategories) // Batch add categories.
 
-	v1.PUT("/category/:name", h.PutCategory) // Upsert category.
-	v1.PUT("/breeds/:name")                  // Upsert breed.
+	v1.PUT("/category/*id", h.PutCategory) // Upsert category.
+	v1.PUT("/breed/*id")                   // Upsert breed.
 
-	v1.PATCH("/category/:name") // Update a category.
-	v1.PATCH("/breed/:name")    // Update a breed.
+	v1.PATCH("/category/:id") // Update a category.
+	v1.PATCH("/breed/:id")    // Update a breed.
 
-	v1.DELETE("/breed")    // Delete a breed.
-	v1.DELETE("/category") // Delete a category.
+	v1.DELETE("/breed/:id")    // Delete a breed.
+	v1.DELETE("/category/:id") // Delete a category.
 
 	return r
 }

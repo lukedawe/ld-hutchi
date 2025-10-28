@@ -8,6 +8,14 @@ type CategoryNameRequiredUri struct {
 	Name string `uri:"name" binding:"required"`
 }
 
+type CategoryIdRequiredUri struct {
+	Id uint `uri:"id" binding:"required"`
+}
+
+type CategoryIdOptionalUri struct {
+	Id uint `uri:"id"`
+}
+
 type Breed struct {
 	BreedNameRequiredJson
 }
@@ -34,15 +42,15 @@ type GetCategoriesToBreeds struct {
 }
 
 type GetCategory struct {
-	CategoryNameRequiredUri
+	CategoryIdRequiredUri
 }
 
 type GetCategoryToBreeds struct {
-	CategoryNameRequiredUri
+	CategoryIdRequiredUri
 }
 
 type PutCategoryUri struct {
-	CategoryNameRequiredUri
+	CategoryIdOptionalUri
 }
 
 type PutCategoryBody struct {
