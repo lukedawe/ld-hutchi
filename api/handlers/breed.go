@@ -6,6 +6,7 @@ import (
 	"lukedawe/hutchi/handlers/dtos/responses"
 	"lukedawe/hutchi/handlers/dtos/responses/errors"
 	error_responses "lukedawe/hutchi/handlers/dtos/responses/errors"
+	response_errors "lukedawe/hutchi/handlers/dtos/responses/errors"
 	"lukedawe/hutchi/models"
 	"lukedawe/hutchi/services"
 	"net/http"
@@ -51,16 +52,9 @@ func (h *Handler) PostBreed(c *gin.Context) {
 		return
 	}
 
-	// Find the category
-	category, err := services.GetCategoryById(h.DB, c, request.CategoryId)
-	if err != nil {
-		c.Error(services.TranslateDbError(err))
-		return
-	}
-
 	breedModel := &models.Breed{
-		Name:     request.Name,
-		Category: category,
+		Name:       request.Name,
+		CategoryID: request.CategoryId,
 	}
 
 	// Send to the database
@@ -70,9 +64,82 @@ func (h *Handler) PostBreed(c *gin.Context) {
 	}
 
 	response := responses.BreedCreated{
-		Name: breedModel.Name,
+		Name:       breedModel.Name,
+		Id:         breedModel.ID,
+		CategoryId: breedModel.CategoryID,
 	}
 
 	// Create the response
 	c.JSON(http.StatusCreated, response)
+}
+
+func (h *Handler) PutBreed(c *gin.Context) {
+	var uri requests.PutBreedUri
+	if err := c.ShouldBindUri(&uri); err != nil {
+		c.Error(response_errors.ErrBadRequestInvalidParam.SetError(err))
+		return
+	}
+
+	// NOTE: For time's sake I'm reusing the AddBreed request because they are
+	//	going to be the same, but really this should have it's own struct.
+	var body requests.AddBreed
+	if err := c.ShouldBindBodyWithJSON(body); err != nil {
+		c.Error(response_errors.ErrBadRequestInvalidJSON.SetError(err))
+		return
+	}
+
+	if err := body.Validate(); err != nil {
+		c.Error(response_errors.ErrBadRequestInvalidJSON.SetError(err))
+		return
+	}
+
+	model := models.Breed{Name: body.Name, ID: uri.Id, CategoryID: body.CategoryId}
+
+	if err := services.UpsertBreed(h.DB, c, &model); err != nil {
+		c.Error(services.TranslateDbError(err))
+		return
+	}
+
+	response := breedModelToResponse(model)
+	c.JSON(http.StatusCreated, response)
+}
+
+func (h *Handler) PatchBreed(c *gin.Context) {
+	var uri requests.PatchBreedUri
+	if err := c.ShouldBindUri(&uri); err != nil {
+		c.Error(response_errors.ErrBadRequestBinding.SetError(err))
+		return
+	}
+
+	var body requests.PatchBreedBody
+	if err := c.ShouldBindBodyWithJSON(&body); err != nil {
+		c.Error(error_responses.ErrBadRequestBinding.SetError(err))
+		return
+	}
+
+	if err := body.Validate(); err != nil {
+		c.Error(err)
+		return
+	}
+
+	model := models.Breed{
+		Name: body.Name,
+		ID:   uri.Id,
+	}
+
+	if err := services.UpdateBreedName(h.DB, c, &model); err != nil {
+		c.Error(services.TranslateDbError(err))
+		return
+	}
+
+	response := breedModelToResponse(model)
+	c.JSON(http.StatusOK, response)
+}
+
+func breedModelToResponse(model models.Breed) responses.BreedCreated {
+	return responses.BreedCreated{
+		Id:         model.ID,
+		Name:       model.Name,
+		CategoryId: model.CategoryID,
+	}
 }

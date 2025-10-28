@@ -48,3 +48,11 @@ type GetCategoryToBreeds struct {
 type PutCategoryUri struct {
 	CategoryIdOptionalUri
 }
+
+type PatchCategoryUri struct {
+	CategoryIdRequiredUri
+}
+
+type PatchCategoryBody struct {
+	CategoryNameRequiredJson
+}

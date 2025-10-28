@@ -32,3 +32,11 @@ type AddBreed struct {
 type PutBreedUri struct {
 	BreedIdOptionalUri
 }
+
+type PatchBreedUri struct {
+	BreedIdOptionalUri
+}
+
+type PatchBreedBody struct {
+	BreedNameRequiredJson
+}

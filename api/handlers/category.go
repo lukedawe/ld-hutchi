@@ -119,7 +119,7 @@ func (h *Handler) PostCategories(c *gin.Context) {
 	}
 
 	if err := request.Validate(); err != nil {
-		c.Error(response_errors.ErrBadRequestValidation.SetError(err))
+		c.Error(err)
 		return
 	}
 
@@ -151,7 +151,7 @@ func (h *Handler) PutCategory(c *gin.Context) {
 
 	var body requests.AddCategoryJson
 	if err := c.ShouldBindBodyWithJSON(&body); err != nil {
-		c.Error(response_errors.ErrBadRequestInvalidJSON.SetError(err))
+		c.Error(response_errors.ErrBadRequestBinding.SetError(err))
 		return
 	}
 
@@ -171,43 +171,36 @@ func (h *Handler) PutCategory(c *gin.Context) {
 	c.JSON(http.StatusCreated, categoryModelToResponse(categoryModel))
 }
 
-func (h *Handler) PutBreed(c *gin.Context) {
-	var uri requests.PutBreedUri
+// Updates the name of the category.
+func (h *Handler) PatchCategory(c *gin.Context) {
+	var uri requests.PatchCategoryUri
 	if err := c.ShouldBindUri(&uri); err != nil {
 		c.Error(response_errors.ErrBadRequestInvalidParam.SetError(err))
 		return
 	}
 
-	// NOTE: For time's sake I'm reusing the AddBreed request because they are
-	//	going to be the same, but really this should have it's own struct.
-	var body requests.AddBreed
-	if err := c.ShouldBindBodyWithJSON(body); err != nil {
-		c.Error(response_errors.ErrBadRequestInvalidJSON.SetError(err))
+	var body requests.PatchCategoryBody
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.Error(response_errors.ErrBadRequestBinding.SetError(err))
 		return
 	}
 
 	if err := body.Validate(); err != nil {
-		c.Error(response_errors.ErrBadRequestInvalidJSON.SetError(err))
+		c.Error(err)
 		return
 	}
 
-	model := models.Breed{Name: body.Name, ID: uri.Id, CategoryID: body.CategoryId}
-
-	if err := services.UpsertBreed(h.DB, c, model); err != nil {
+	model := &models.Category{
+		Name: body.Name,
+		ID:   uri.Id,
+	}
+	err := services.UpdateCategoryName(h.DB, c, model)
+	if err != nil {
 		c.Error(services.TranslateDbError(err))
 		return
 	}
 
-	response := breedModelToResponse(model)
-	c.JSON(http.StatusCreated, response)
-}
-
-func breedModelToResponse(model models.Breed) responses.BreedCreated {
-	return responses.BreedCreated{
-		Id:         model.ID,
-		Name:       model.Name,
-		CategoryId: model.CategoryID,
-	}
+	c.JSON(http.StatusOK, categoryModelToResponse(*model))
 }
 
 // Helper functions for conversion between the DB model and the responses.

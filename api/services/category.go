@@ -66,13 +66,26 @@ func UpsertCategory(db *gorm.DB, c context.Context, upsertCat *models.Category) 
 		})
 }
 
-func UpsertBreed(db *gorm.DB, c context.Context, upsertBreed models.Breed) error {
+func UpdateCategoryName(db *gorm.DB, c context.Context, updatedCategory *models.Category) error {
 	return db.WithContext(c).Transaction(func(tx *gorm.DB) error {
-		return tx.Clauses(
-			clause.OnConflict{
-				Columns:   []clause.Column{{Name: "id"}},
-				UpdateAll: true,
-			},
-		).Create(&upsertBreed).Error
+		rowsAffected, err := gorm.G[models.Category](tx).
+			Where("id = ?", updatedCategory.ID).
+			Update(c, "name", updatedCategory.Name)
+
+		if err != nil {
+			return err
+		}
+
+		if rowsAffected == 0 {
+			return gorm.ErrRecordNotFound
+		}
+
+		model, err := gorm.G[models.Category](tx).Preload("Breeds", nil).Where("id = ?", updatedCategory.ID).First(c)
+		if err != nil {
+			return err
+		}
+
+		updatedCategory = &model
+		return nil
 	})
 }

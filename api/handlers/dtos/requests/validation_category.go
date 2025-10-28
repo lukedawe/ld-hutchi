@@ -64,10 +64,19 @@ func (request *AddCategoryJson) Validate() error {
 		err = errors.Join(breed.ValidateBreedNameRequiredJson())
 	}
 	if err != nil {
-		response := error_responses.ErrBadRequestInvalidParam.SetError(err)
+		response := error_responses.ErrBadRequestValidation.SetError(err)
 		response.Message = err.Error() // Copy error message because it's user facing.
 		return response
 	}
 
+	return nil
+}
+
+func (request *PatchCategoryBody) Validate() error {
+	if err := request.ValidateCategoryNameRequiredJson(); err != nil {
+		response := error_responses.ErrBadRequestValidation.SetError(err)
+		response.Message = err.Error()
+		return response
+	}
 	return nil
 }

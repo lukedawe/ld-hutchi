@@ -98,11 +98,11 @@ func setupRouter(DB *sql.DB) *gin.Engine {
 
 	v1.PUT("/category/:id", h.PutCategory) // Upsert category.
 	v1.PUT("/category", h.PutCategory)     // Upsert category.
-	v1.PUT("/breed/:id")                   // Upsert breed.
-	v1.PUT("/breed")                       // Upsert breed.
+	v1.PUT("/breed/:id", h.PutBreed)       // Upsert breed.
+	v1.PUT("/breed", h.PutBreed)           // Upsert breed.
 
-	v1.PATCH("/category/:id") // Update a category.
-	v1.PATCH("/breed/:id")    // Update a breed.
+	v1.PATCH("/category/:id", h.PatchCategory) // Update a category.
+	v1.PATCH("/breed/:id", h.patch)            // Update a breed.
 
 	v1.DELETE("/breed/:id")    // Delete a breed.
 	v1.DELETE("/category/:id") // Delete a category.

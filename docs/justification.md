@@ -7,3 +7,7 @@ I have chosen a relational database (Postgres) because the data follows a rigid 
 ## Documentation
 
 I would have liked to use OpenAPI given more time.
+
+## Design
+
+Because this API is so simple, there is no need to create separate Service and Persistence layers, because the persistence layer would almost be non-existent.
