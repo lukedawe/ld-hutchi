@@ -9,7 +9,9 @@ const API_BASE_URL = 'http://localhost:8081/v1'
 
 function App() {
   const [count, setCount] = useState(0)
-  const [categories, setCategories] = useState<CategoryResponse[] | null>([])
+  const [categories, setCategories] = useState<CategoryResponse[] | null>(
+    [{ id: 1, name: "hello", breeds: [] }]
+  )
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // A function to show and hide the breeds.
@@ -21,7 +23,7 @@ function App() {
     setError(null);
 
     try {
-      const endpoint = `${API_BASE_URL}/breeds/categories/` + currentPage;
+      const endpoint = `${API_BASE_URL}/breeds/categories/` + currentPage + "/" + 100;
       const response = await fetch(endpoint)
 
       if (!response.ok) {
@@ -29,6 +31,7 @@ function App() {
       }
 
       const data = await response.json();
+      console.log(data)
       setCategories(data);
     }
     catch (err) {
@@ -50,28 +53,15 @@ function App() {
   }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <table>
+      <thead>
+        {categories?.map(
+          (category) =>
+            <tr id={category.id.toString()}>
+              <th> I am a boss: {category.id}</th>
+            </tr>)}
+      </thead>
+    </table>
   )
 }
 
