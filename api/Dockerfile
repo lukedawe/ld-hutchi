@@ -12,12 +12,18 @@ COPY . .
 
 RUN swag init
 
-RUN CGO_ENABLED=0 GOOS=linux GIN_MODE=release go build -o api
+RUN CGO_ENABLED=0 GOOS=linux go build -o api
 
 FROM golang:latest
 
 WORKDIR /app
 
 COPY --from=build /app/api ./
+
+COPY .env .
+
+ENV GIN_MODE=release
+
+CMD [ "./api" ]
 
 EXPOSE 8080

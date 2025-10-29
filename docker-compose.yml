@@ -23,19 +23,24 @@ services:
       args:
       - REACT_APP_SERVICES_HOST=/services/m
     ports:
-      - "80:80"
+      - 80:80
+    depends_on:
+      - api
     networks:
       - backend
       - frontend
 
   api:
-    image: nginx-backend
+    image: gin-backend
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     build:
       context: ./api
     networks:
       - backend
+    expose:
+      - 8080
 
   adminer:
     image: adminer

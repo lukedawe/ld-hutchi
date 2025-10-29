@@ -11,7 +11,7 @@ const theme = createTheme({
   /** Put your mantine theme override here */
 });
 
-const API_BASE_URL = 'http://localhost:8081/v1'
+const API_BASE_URL = 'http://localhost/services'
 
 function App() {
   const [______, _______] = useState(0)

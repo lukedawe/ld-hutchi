@@ -123,8 +123,6 @@ func setupRouter(DB *sql.DB) *gin.Engine {
 }
 
 func main() {
-	// gin.SetMode(gin.ReleaseMode)
-
 	var envFileName string
 	if gin.IsDebugging() {
 		envFileName = "dev.env"
