@@ -1,5 +1,3 @@
-import {XCircle} from 'lucide';
-
 interface ErrorDisplayProps {
     error: string | null;
     onErrorDismiss: () => void;

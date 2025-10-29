@@ -10,15 +10,44 @@ services:
       interval: 1s
       timeout: 5s
       retries: 10
-    ports:
-      - 5432:5432
     volumes:
       - pgdata:/var/lib/postgresql/data 
+    networks:
+      - backend
+    
+  website:
+    image: nginx-frontend
+    build:
+      context:
+        ./website
+      args:
+      - REACT_APP_SERVICES_HOST=/services/m
+    ports:
+      - "80:80"
+    networks:
+      - backend
+      - frontend
+
+  api:
+    image: nginx-backend
+    depends_on:
+      - db
+    build:
+      context: ./api
+    networks:
+      - backend
 
   adminer:
     image: adminer
     restart: always
     ports:
       - 8082:8080
+    networks:
+      - backend
+
 volumes:
   pgdata:
+
+networks:
+  backend:
+  frontend:

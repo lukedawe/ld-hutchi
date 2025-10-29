@@ -1,16 +1,22 @@
-import { Badge, Group, Table, Text } from "@mantine/core";
-import type { BreedResponse, CategoryResponse } from "../dtos";
+import { Card, Table, Text } from "@mantine/core";
+import type { CategoryResponse } from "../dtos";
 
-function row(category:CategoryResponse) {
+export function row(category: CategoryResponse) {
+    const breedsList = category.breeds.map((breed) => {
+        return (<Card shadow="sm" padding="lg">
+            <Card.Section>
+                <Text>
+                    {breed.name}
+                </Text>
+            </Card.Section>
+        </Card>)
+    });
+
     return (
-        <Table.Tr>
+        <Table.Tr key={category.id}>
+            <Table.Td>{category.name}</Table.Td>
             <Table.Td>
-                <Badge color="blue" variant="light" size="lg">{category.id}</Badge>
-            </Table.Td>
-            <Table.Td>
-                <Group gap="xs">
-                    <Text fw={500}>{category.name}</Text>
-                </Group>
+                {breedsList}
             </Table.Td>
         </Table.Tr>
     );

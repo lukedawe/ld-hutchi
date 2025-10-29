@@ -1,22 +1,29 @@
 import { useState, useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 import './lib/dtos'
 import type { CategoryResponse } from './lib/dtos'
+import { createTheme, MantineProvider, Table } from '@mantine/core'
+import { row } from './lib/ui/table_row'
+import '@mantine/core/styles.css';
+
+
+const theme = createTheme({
+  /** Put your mantine theme override here */
+});
 
 const API_BASE_URL = 'http://localhost:8081/v1'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [______, _______] = useState(0)
   const [categories, setCategories] = useState<CategoryResponse[] | null>(
-    [{ id: 1, name: "hello", breeds: [] }]
+    [{ id: 1, name: "hello", breeds: [] }, { id: 2, name: "hello", breeds: [{ name: "Doggy", id: 4 }, { name: "Brother", id: 4 }] }]
+
   )
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [_, setLoading] = useState(false);
+  const [__, setError] = useState<string | null>(null);
   // A function to show and hide the breeds.
-  const [openCategory, setOpenCategory] = useState<number | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [____, ___] = useState<number | null>(null);
+  const [currentPage, _____] = useState(1);
 
   const fetchCategories = async () => {
     setLoading(true);
@@ -48,20 +55,28 @@ function App() {
     fetchCategories();
   }, []);
 
-  const toggleBreeds = (categoryId: number) => {
-    setOpenCategory(openCategory === categoryId ? null : categoryId);
-  }
+  const rows = categories?.map((category) => {
+    return (
+      row(category)
+    )
+  });
 
   return (
-    <table>
-      <thead>
-        {categories?.map(
-          (category) =>
-            <tr id={category.id.toString()}>
-              <th> I am a boss: {category.id}</th>
-            </tr>)}
-      </thead>
-    </table>
+    <MantineProvider theme={theme}>
+      <Table striped highlightOnHover withTableBorder>
+        <Table.Thead>
+          <Table.Tr id='heading'>
+            <Table.Th>
+              Name
+            </Table.Th>
+            <Table.Th>
+              Breeds
+            </Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>{rows}</Table.Tbody>
+      </Table>
+    </MantineProvider>
   )
 }
 
