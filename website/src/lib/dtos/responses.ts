@@ -1,3 +1,4 @@
+// Response DTOs.
 
 export interface BreedResponse {
     id: number;
