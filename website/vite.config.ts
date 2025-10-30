@@ -10,4 +10,12 @@ export default defineConfig({
       },
     }),
   ],
+  server: {
+    proxy: {
+      '/services/': {
+        target: 'http://localhost:8081/',
+        rewrite: path => path.replace(/^\/services/, '')
+      }
+    }
+  }
 })
