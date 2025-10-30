@@ -12,4 +12,5 @@
 - [X] Move queries over to the services package.
 - [ ] Make sure that endpoints are HTTP compliant [](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference).
 - [ ] Get endpoints should return uri's for more actions in the json body.
-- [ ] Update and delete methods.
+- [X] Update and delete methods.
+- [ ] Dev environment setup.

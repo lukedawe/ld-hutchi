@@ -1,4 +1,4 @@
-# A Docker Compose file to set up a dev environment (not for production)
+# A Docker Compose file for production.
 services:
   db:
     image: postgres
