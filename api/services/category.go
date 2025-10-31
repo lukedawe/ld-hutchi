@@ -45,24 +45,34 @@ func UpsertCategory(db *gorm.DB, c context.Context, upsertCat *models.Category) 
 		WithContext(c).
 		Transaction(func(tx *gorm.DB) error {
 			err := tx.
+				// Session(
+				// 	&gorm.Session{FullSaveAssociations: true},
+				// ).
 				Clauses(
 					clause.OnConflict{
 						Columns:   []clause.Column{{Name: "id"}},
 						UpdateAll: true,
 					}).
+				Omit("Breeds").
 				Create(&upsertCat).Error
 
 			if err != nil {
 				return err
 			}
 
-			// Replace all the associated breeds.
-			return tx.
-				Model(&upsertCat).
+			// Remove the associations -- I wanted to do this with Replace, but I can't get that to work for Names that remain the same.
+			// We need to duplicate some information from upsertCat because Model takes a pointer and updates information using the ref.
+			if err = tx.
+				Model(&models.Category{ID: upsertCat.ID}).
 				Unscoped().
 				Association("Breeds").
 				Unscoped().
-				Replace(upsertCat.Breeds)
+				Clear(); err != nil {
+				return err
+			}
+
+			return tx.
+				Model(&models.Category{ID: upsertCat.ID}).Association("Breeds").Append(upsertCat.Breeds)
 		})
 }
 
