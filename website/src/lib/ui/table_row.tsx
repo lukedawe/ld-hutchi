@@ -1,5 +1,5 @@
 import { Table, TextInput, Button, Group, Grid } from "@mantine/core";
-import { CategoryResponseZod, ErrorResponseZod, type BreedResponse, type CategoryResponse, type ErrorResponse } from "../dtos/responses";
+import { BreedResponseZod, CategoryResponseZod, ErrorResponseZod, type BreedResponse, type CategoryResponse, type ErrorResponse } from "../dtos/responses";
 import { useState, useRef, useEffect } from "react";
 import { API_BASE_URL } from "../../App";
 import BreedList from "./breed_list";
@@ -99,10 +99,9 @@ export function CategoryRow({ category, deleteCategory, setError, setMessage }: 
                 }
                 else setError("Unexpected result");
             }
-            const payload = await res.json();
-            // payload expected to have { id?: number, name: string }
-            const newBreed: BreedResponse = { id: payload.id ?? Date.now(), name: String(payload.name ?? "") };
-            setCategoryState((cur) => ({ ...cur, breeds: [...cur.breeds, newBreed] }));
+            const breedResponseJson = await res.json();
+            const breedResponse = BreedResponseZod.parse(breedResponseJson);
+            setCategoryState((cur) => ({ ...cur, breeds: [...cur.breeds, breedResponse as BreedResponse] }));
             setMessage('Breed added');
         } catch (err) {
             console.error('addBreed error', err);
@@ -114,10 +113,12 @@ export function CategoryRow({ category, deleteCategory, setError, setMessage }: 
     };
 
     const removeBreed = (id: number) => {
+        // TODO: Add sending request here.
         setCategoryState((cur) => ({ ...cur, breeds: cur.breeds.filter((b) => b.id !== id) }));
     };
 
     const setBreedName = (id: number, name: string) => {
+        // TODO: Add sending request here.
         setCategoryState((cur) => ({ ...cur, breeds: cur.breeds.map((breed) => breed.id !== id ? breed : { id: breed.id, name }) }));
     };
 
