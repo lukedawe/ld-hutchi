@@ -1,12 +1,15 @@
 import { Card, Table, TextInput, Button, Group, Grid } from "@mantine/core";
 import type { CategoryResponse } from "../dtos/responses";
 import { useState } from "react";
+import { API_BASE_URL } from "../../App";
 
-function SubmitRequest(data: any) {
-    // Send post message to api
-}
-
-export function CategoryRow({ category }: { category: CategoryResponse }) {
+export function CategoryRow(
+    { category, deleteCategory, setError }: {
+        category: CategoryResponse,
+        deleteCategory: (breedId: number) => void,
+        setError: (error: string) => void,
+        setMessage: (message: string) => void,
+    }) {
     // add state for the editable category name and breed values (controlled)
     const [categoryName, setCategoryName] = useState(category.name);
     const [breedNames, setBreedNames] = useState<string[]>(
@@ -43,17 +46,50 @@ export function CategoryRow({ category }: { category: CategoryResponse }) {
 
     const submitChanges = async () => {
         setSubmitting(true);
-        try {
-            await fetch('/api/category', {
-
-            });
-        } finally {
-            setSubmitting(false);
-        }
+        fetch(`${API_BASE_URL}/category/${category.id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: categoryName,
+                breeds: breedNames.map((name)=>({name: name})),
+            })
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response;
+            })
+            .then((response) => response.json())
+            .then((responseJson) => {
+                const categoryResponse = responseJson as CategoryResponse
+                setCategoryName(categoryResponse.name);
+                setBreedNames(categoryResponse.breeds.map((breed) => breed.name))
+            }
+            )
+            .catch(error => {
+                console.log("there has been an error.", error);
+                const message = (error && (error as any).message) ? (error as any).message : String(error);
+                setError(message);
+            }
+            )
+            .finally(() => setSubmitting(false))
     }
 
     const deleteColumn = async () => {
         setSubmitting(true);
+        fetch(`${API_BASE_URL}/category/${category.id}`, {
+            method: 'DELETE'
+        })
+            .then((response) => response.ok ? deleteCategory(category.id) : null)
+            .catch(error => {
+                console.log(`there has been an error:`, error)
+                const message = (error && (error as any).message) ? (error as any).message : String(error);
+                setError(message);
+            })
+            .finally(() => setSubmitting(false))
     }
 
     return (

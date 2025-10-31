@@ -1,4 +1,6 @@
 // ...new file...
+import { RequestInfo } from './requestInfo';
+
 export interface BreedNameRequiredJson {
   name: string;
 }
@@ -21,12 +23,66 @@ export interface AddBreed {
   category_id: number;
 }
 
-/** Alias types mirroring Go DTO names */
-export type GetBreed = BreedIdRequiredUri;
-export type PutBreedUri = BreedIdOptionalUri;
-export type PatchBreedUri = BreedIdOptionalUri;
-export type PatchBreedBody = BreedNameRequiredJson;
-export type DeleteBreedUri = BreedIdRequiredUri;
+/** Classes that implement the request shapes and provide toRequestInfo() */
+export class GetBreed implements BreedIdRequiredUri {
+  id: number;
+
+  constructor(id: number) {
+    this.id = id;
+  }
+
+  toRequestInfo() {
+    return new RequestInfo({ body: { class: 'GetBreed', id: this.id } });
+  }
+}
+
+export class PutBreedUri implements BreedIdOptionalUri {
+  id?: number;
+
+  constructor(id?: number) {
+    this.id = id;
+  }
+
+  toRequestInfo() {
+    return new RequestInfo({ body: { class: 'PutBreedUri', id: this.id } });
+  }
+}
+
+export class PatchBreedUri implements BreedIdOptionalUri {
+  id?: number;
+
+  constructor(id?: number) {
+    this.id = id;
+  }
+
+  toRequestInfo() {
+    return new RequestInfo({ body: { class: 'PatchBreedUri', id: this.id } });
+  }
+}
+
+export class PatchBreedBody implements BreedNameRequiredJson {
+  name: string;
+
+  constructor(name: string) {
+    this.name = name;
+  }
+
+  toRequestInfo() {
+    return new RequestInfo({ body: { class: 'PatchBreedBody', name: this.name } });
+  }
+}
+
+export class DeleteBreedUri implements BreedIdRequiredUri {
+  id: number;
+
+  constructor(id: number) {
+    this.id = id;
+  }
+
+  toRequestInfo() {
+    return new RequestInfo({ body: { class: 'DeleteBreedUri', id: this.id } });
+  }
+}
 
 export const breedEndpoints = {
   addBreed: '/breed',

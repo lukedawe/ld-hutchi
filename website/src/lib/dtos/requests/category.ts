@@ -1,4 +1,5 @@
-// ...new file...
+import { RequestInfo } from "./requestInfo";
+
 export interface CategoryNameRequiredJson {
   name: string;
 }
@@ -40,13 +41,92 @@ export interface Paginated {
   per_page: number;
 }
 
-export type GetCategoriesToBreeds = Paginated;
-export type GetCategory = CategoryIdRequiredUri;
-export type GetCategoryToBreeds = CategoryIdRequiredUri;
-export type PutCategoryUri = CategoryIdOptionalUri;
-export type PatchCategoryUri = CategoryIdRequiredUri;
-export type PatchCategoryBody = CategoryNameRequiredJson;
-export type DeleteCategoryUri = CategoryIdRequiredUri;
+/** Classes that implement the request shapes and provide toRequestInfo() */
+export class GetCategoriesToBreeds implements Paginated {
+  page: number;
+  per_page: number;
+
+  constructor(page: number, per_page: number) {
+    this.page = page;
+    this.per_page = per_page;
+  }
+
+  toRequestInfo() {
+    return new RequestInfo({ body: { class: 'GetCategoriesToBreeds', page: this.page, per_page: this.per_page } });
+  }
+}
+
+export class GetCategory implements CategoryIdRequiredUri {
+  id: number;
+
+  constructor(id: number) {
+    this.id = id;
+  }
+
+  toRequestInfo() {
+    return new RequestInfo({ body: { class: 'GetCategory', id: this.id } });
+  }
+}
+
+export class GetCategoryToBreeds implements CategoryIdRequiredUri {
+  id: number;
+
+  constructor(id: number) {
+    this.id = id;
+  }
+
+  toRequestInfo() {
+    return new RequestInfo({ body: { class: 'GetCategoryToBreeds', id: this.id } });
+  }
+}
+
+export class PutCategoryUri implements CategoryIdOptionalUri {
+  id?: number;
+
+  constructor(id?: number) {
+    this.id = id;
+  }
+
+  toRequestInfo() {
+    return new RequestInfo({ body: { class: 'PutCategoryUri', id: this.id } });
+  }
+}
+
+export class PatchCategoryUri implements CategoryIdRequiredUri {
+  id: number;
+
+  constructor(id: number) {
+    this.id = id;
+  }
+
+  toRequestInfo() {
+    return new RequestInfo({ body: { class: 'PatchCategoryUri', id: this.id } });
+  }
+}
+
+export class PatchCategoryBody implements CategoryNameRequiredJson {
+  name: string;
+
+  constructor(name: string) {
+    this.name = name;
+  }
+
+  toRequestInfo() {
+    return new RequestInfo({ body: { class: 'PatchCategoryBody', name: this.name } });
+  }
+}
+
+export class DeleteCategoryUri implements CategoryIdRequiredUri {
+  id: number;
+
+  constructor(id: number) {
+    this.id = id;
+  }
+
+  toRequestInfo() {
+    return new RequestInfo({ body: { class: 'DeleteCategoryUri', id: this.id } });
+  }
+}
 
 export const categoryEndpoints = {
   addCategory: '/categories',
