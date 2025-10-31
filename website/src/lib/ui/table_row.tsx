@@ -1,5 +1,5 @@
 import { Table, TextInput, Button, Group, Grid } from "@mantine/core";
-import { jsonToCategoryResponse, type BreedResponse, type CategoryResponse } from "../dtos/responses";
+import { CategoryResponseZod, ErrorResponseZod, type BreedResponse, type CategoryResponse, type ErrorResponse } from "../dtos/responses";
 import { useState, useRef, useEffect } from "react";
 import { API_BASE_URL } from "../../App";
 import BreedList from "./breed_list";
@@ -13,8 +13,8 @@ interface CategoryRowProps {
 
 export function CategoryRow({ category, deleteCategory, setError, setMessage }: CategoryRowProps) {
     // local editable state; keep original for reset
-    const originalRef = useRef<CategoryResponse>(category);
-    const [categoryState, setCategoryState] = useState<CategoryResponse>(category);
+    const originalRef = useRef(category);
+    const [categoryState, setCategoryState] = useState(category);
     // if parent provides a new category object (e.g. refetch), sync local and original
     useEffect(() => {
         originalRef.current = category;
@@ -41,17 +41,19 @@ export function CategoryRow({ category, deleteCategory, setError, setMessage }: 
             });
 
             if (!res.ok) {
-                let errText = '';
-                try { errText = (await res.json()).message; } catch (_) { }
-                throw new Error(`Request failed ${res.status}${errText ? `: ${errText}` : ''}`);
+                const errorMessage = ErrorResponseZod.safeParse(await res.json())
+                if (errorMessage.success) {
+                    setError((errorMessage.data as ErrorResponse).message)
+                }
+                else setError("Unexpected result");
             }
 
             const responseJson = await res.json().catch(() => null);
-            const categoryResponse = jsonToCategoryResponse(responseJson);
-            setCategoryState(categoryResponse);
+            const categoryResponse = CategoryResponseZod.parse(responseJson);
+            setCategoryState(categoryResponse as CategoryResponse);
             setMessage('Category saved');
         } catch (err) {
-            console.error('submitChanges error', err);
+            console.error('submit category error', err);
             const message = err instanceof Error ? err.message : String(err);
             setError(message);
         } finally {
@@ -64,14 +66,16 @@ export function CategoryRow({ category, deleteCategory, setError, setMessage }: 
         try {
             const res = await fetch(`${API_BASE_URL}/category/${categoryState.id}`, { method: 'DELETE' });
             if (!res.ok) {
-                let errText = '';
-                try { errText = (await res.json()).message; } catch (_) { }
-                throw new Error(`Delete failed ${res.status}${errText ? `: ${errText}` : ''}`);
+                const errorMessage = ErrorResponseZod.safeParse(await res.json())
+                if (errorMessage.success) {
+                    setError((errorMessage.data as ErrorResponse).message)
+                }
+                else setError("Unexpected result");
             }
             deleteCategory(categoryState.id);
             setMessage('Category deleted');
         } catch (err) {
-            console.error('deleteColumn error', err);
+            console.error('delete category error', err);
             const message = err instanceof Error ? err.message : String(err);
             setError(message);
         } finally {
@@ -89,9 +93,11 @@ export function CategoryRow({ category, deleteCategory, setError, setMessage }: 
                 body: JSON.stringify({ category_id: categoryState.id }),
             });
             if (!res.ok) {
-                let errText = '';
-                try { errText = (await res.json()).message; } catch (_) { }
-                throw new Error(`Add breed failed ${res.status}${errText ? `: ${errText}` : ''}`);
+                const errorMessage = ErrorResponseZod.safeParse(await res.json())
+                if (errorMessage.success) {
+                    setError((errorMessage.data as ErrorResponse).message)
+                }
+                else setError("Unexpected result");
             }
             const payload = await res.json();
             // payload expected to have { id?: number, name: string }

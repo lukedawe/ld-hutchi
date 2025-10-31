@@ -1,5 +1,5 @@
 import { Button, Card, Grid, TextInput, Group } from "@mantine/core";
-import type { BreedResponse } from "../dtos/responses";
+import { type BreedResponse } from "../dtos/responses";
 
 interface BreedListProps {
     categoryId: number | undefined;
