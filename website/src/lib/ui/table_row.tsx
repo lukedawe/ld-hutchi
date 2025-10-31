@@ -1,10 +1,11 @@
-import { Card, Table, TextInput, Button, Group, Grid } from "@mantine/core";
+import { Table, TextInput, Button, Group, Grid } from "@mantine/core";
 import type { CategoryResponse } from "../dtos/responses";
-import { useState } from "react";
+import { cloneElement, useState } from "react";
 import { API_BASE_URL } from "../../App";
+import BreedList from "./breed_list";
 
 export function CategoryRow(
-    { category, deleteCategory, setError }: {
+    { category, deleteCategory, setError, setMessage }: {
         category: CategoryResponse,
         deleteCategory: (breedId: number) => void,
         setError: (error: string) => void,
@@ -17,28 +18,6 @@ export function CategoryRow(
     );
     const [submitting, setSubmitting] = useState(false);
 
-    function BreedCard({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-        return (
-            <Card shadow="sm" padding="lg">
-                <Card.Section>
-                    <TextInput value={value} onChange={(event) => onChange(event.currentTarget.value)} />
-                </Card.Section>
-            </Card>
-        );
-    }
-
-    const breedsList = breedNames.map((bName, idx) => (
-        <BreedCard
-            key={`${category.breeds[idx]?.id ?? 'breed'}-${idx}`}
-            value={bName}
-            onChange={(v) => setBreedNames((prev) => {
-                const next = [...prev];
-                next[idx] = v;
-                return next;
-            })}
-        />
-    ));
-
     // dirty if category name or any breed name differs from original
     const isDirty =
         categoryName !== category.name ||
@@ -46,50 +25,69 @@ export function CategoryRow(
 
     const submitChanges = async () => {
         setSubmitting(true);
-        fetch(`${API_BASE_URL}/category/${category.id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                name: categoryName,
-                breeds: breedNames.map((name)=>({name: name})),
-            })
-        })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response;
-            })
-            .then((response) => response.json())
-            .then((responseJson) => {
-                const categoryResponse = responseJson as CategoryResponse
+        try {
+            const res = await fetch(`${API_BASE_URL}/category/${category.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: categoryName, breeds: breedNames.map((name) => ({ name })) }),
+            });
+
+            if (!res.ok) {
+                // try to read error body if present
+                let errText = '';
+                try { errText = await res.text(); } catch (_) { /* ignore */ }
+                throw new Error(`Request failed ${res.status}${errText ? `: ${errText}` : ''}`);
+            }
+
+            const responseJson = await res.json().catch(() => null);
+
+            if (!responseJson || typeof responseJson !== 'object') {
+                throw new Error('Invalid response from server');
+            }
+
+            // safe check for expected fields before casting
+            if ('name' in responseJson && 'breeds' in responseJson && Array.isArray((responseJson as any).breeds)) {
+                const categoryResponse = responseJson as CategoryResponse;
                 setCategoryName(categoryResponse.name);
-                setBreedNames(categoryResponse.breeds.map((breed) => breed.name))
+                setBreedNames(categoryResponse.breeds.map((breed) => breed.name));
+                // notify success
+                setMessage('Category saved');
+            } else if ('message' in responseJson && typeof (responseJson as any).message === 'string') {
+                throw new Error((responseJson as any).message);
+            } else {
+                throw new Error('Unexpected server response');
             }
-            )
-            .catch(error => {
-                console.log("there has been an error.", error);
-                const message = (error && (error as any).message) ? (error as any).message : String(error);
-                setError(message);
-            }
-            )
-            .finally(() => setSubmitting(false))
+        } catch (err) {
+            console.error('submitChanges error', err);
+            const message = err instanceof Error ? err.message : String(err);
+            setError(message);
+        } finally {
+            setSubmitting(false);
+        }
     }
 
     const deleteColumn = async () => {
         setSubmitting(true);
-        fetch(`${API_BASE_URL}/category/${category.id}`, {
-            method: 'DELETE'
-        })
-            .then((response) => response.ok ? deleteCategory(category.id) : null)
-            .catch(error => {
-                console.log(`there has been an error:`, error)
-                const message = (error && (error as any).message) ? (error as any).message : String(error);
-                setError(message);
-            })
-            .finally(() => setSubmitting(false))
+        try {
+            const res = await fetch(`${API_BASE_URL}/category/${category.id}`, { method: 'DELETE' });
+            if (!res.ok) {
+                let errText = '';
+                try { errText = await res.text(); } catch (_) { }
+                throw new Error(`Delete failed ${res.status}${errText ? `: ${errText}` : ''}`);
+            }
+            deleteCategory(category.id);
+            setMessage('Category deleted');
+        } catch (err) {
+            console.error('deleteColumn error', err);
+            const message = err instanceof Error ? err.message : String(err);
+            setError(message);
+        } finally {
+            setSubmitting(false);
+        }
+    }
+
+    const addBreedField = () => {
+        setBreedNames((prev)=>[...prev, ""])
     }
 
     return (
@@ -102,21 +100,20 @@ export function CategoryRow(
                     />
                 </Group>
             </Table.Td>
-            <Table.Td>{breedsList}</Table.Td>
+            <Table.Td>
+                <BreedList categoryId={category.id} breedNames={breedNames} setBreedNames={setBreedNames} addBreed={addBreedField}></BreedList>
+            </Table.Td>
             <Grid w={400}>
                 <Grid.Col>
-                    <Button size="xs" onClick={deleteColumn} loading={submitting}>
+                    <Button color="red" size="xs" onClick={deleteColumn} loading={submitting}>
                         Delete
                     </Button>
                 </Grid.Col>
-                {isDirty && (
-                    <Grid.Col>
-                        <Button size="xs" onClick={submitChanges} loading={submitting}>
-                            Save
-                        </Button>
-                    </Grid.Col>
-                )
-                }
+                <Grid.Col hidden={!isDirty}>
+                    <Button size="xs" onClick={submitChanges} loading={submitting}>
+                        Save
+                    </Button>
+                </Grid.Col>
             </Grid>
         </Table.Tr>
     );
