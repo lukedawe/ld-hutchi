@@ -1,56 +1,55 @@
 import { Table, TextInput, Button, Group, Grid } from "@mantine/core";
 import { jsonToCategoryResponse, type BreedResponse, type CategoryResponse } from "../dtos/responses";
-import { cloneElement, useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { API_BASE_URL } from "../../App";
 import BreedList from "./breed_list";
 
-interface CategoryRow {
-    category: CategoryResponse,
-    deleteCategory: (CategoryId: number) => void,
-    deleteBreed: (breedId: number) => void,
-    addBreed: () => void,
-    setError: (error: string) => void,
-    setMessage: (message: string) => void,
+interface CategoryRowProps {
+    category: CategoryResponse;
+    deleteCategory: (CategoryId: number) => void;
+    setError: (error: string) => void;
+    setMessage: (message: string) => void;
 }
 
-export function CategoryRow(
-    { category, deleteCategory, setError, setMessage }: CategoryRow) {
-    // add state for the editable category name and breed values (controlled).
-    const [categoryState, setCategoryState] = useState(category);
+export function CategoryRow({ category, deleteCategory, setError, setMessage }: CategoryRowProps) {
+    // local editable state; keep original for reset
+    const originalRef = useRef<CategoryResponse>(category);
+    const [categoryState, setCategoryState] = useState<CategoryResponse>(category);
+    // if parent provides a new category object (e.g. refetch), sync local and original
+    useEffect(() => {
+        originalRef.current = category;
+        setCategoryState(category);
+    }, [category]);
     const [submitting, setSubmitting] = useState(false);
 
     // dirty if category name or any breed name differs from original.
     const isDirty =
-        categoryState.name !== category.name ||
-        categoryState.breeds.some((breed, i) => breed.name !== (category.breeds[i]?.name ?? ""));
+        categoryState.name !== originalRef.current.name ||
+        categoryState.breeds.some((breed, i) => breed.name !== (originalRef.current.breeds[i]?.name ?? ""));
 
     const submitChanges = async () => {
         setSubmitting(true);
         try {
-            const res = await fetch(`${API_BASE_URL}/category/${category.id}`, {
+            const res = await fetch(`${API_BASE_URL}/category/${categoryState.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     id: categoryState.id,
                     name: categoryState.name,
                     breeds: categoryState.breeds,
-                }
-                ),
+                }),
             });
 
             if (!res.ok) {
-                // try to read error body if present
                 let errText = '';
-                try { errText = (await res.json()).message; } catch (_) { /* ignore */ }
+                try { errText = (await res.json()).message; } catch (_) { }
                 throw new Error(`Request failed ${res.status}${errText ? `: ${errText}` : ''}`);
             }
 
             const responseJson = await res.json().catch(() => null);
-            // Can throw casting errors.
             const categoryResponse = jsonToCategoryResponse(responseJson);
             setCategoryState(categoryResponse);
             setMessage('Category saved');
-
         } catch (err) {
             console.error('submitChanges error', err);
             const message = err instanceof Error ? err.message : String(err);
@@ -58,18 +57,18 @@ export function CategoryRow(
         } finally {
             setSubmitting(false);
         }
-    }
+    };
 
     const deleteColumn = async () => {
         setSubmitting(true);
         try {
-            const res = await fetch(`${API_BASE_URL}/category/${category.id}`, { method: 'DELETE' });
+            const res = await fetch(`${API_BASE_URL}/category/${categoryState.id}`, { method: 'DELETE' });
             if (!res.ok) {
                 let errText = '';
                 try { errText = (await res.json()).message; } catch (_) { }
                 throw new Error(`Delete failed ${res.status}${errText ? `: ${errText}` : ''}`);
             }
-            deleteCategory(category.id);
+            deleteCategory(categoryState.id);
             setMessage('Category deleted');
         } catch (err) {
             console.error('deleteColumn error', err);
@@ -78,37 +77,51 @@ export function CategoryRow(
         } finally {
             setSubmitting(false);
         }
-    }
+    };
 
-    const addBreed = () => {
-        setCategoryState(currentVal => {
-            currentVal.breeds = [...currentVal.breeds, { id: 0, name: "" }];
-            return currentVal;
-        })
-    }
+    // Add a new breed by POSTing to the API and appending the returned breed
+    const addBreed = async () => {
+        setSubmitting(true);
+        try {
+            const res = await fetch(`${API_BASE_URL}/breed`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ category_id: categoryState.id }),
+            });
+            if (!res.ok) {
+                let errText = '';
+                try { errText = (await res.json()).message; } catch (_) { }
+                throw new Error(`Add breed failed ${res.status}${errText ? `: ${errText}` : ''}`);
+            }
+            const payload = await res.json();
+            // payload expected to have { id?: number, name: string }
+            const newBreed: BreedResponse = { id: payload.id ?? Date.now(), name: String(payload.name ?? "") };
+            setCategoryState((cur) => ({ ...cur, breeds: [...cur.breeds, newBreed] }));
+            setMessage('Breed added');
+        } catch (err) {
+            console.error('addBreed error', err);
+            const message = err instanceof Error ? err.message : String(err);
+            setError(message);
+        } finally {
+            setSubmitting(false);
+        }
+    };
 
-    // TODO: Submit a network request before settng the state.
     const removeBreed = (id: number) => {
-        setCategoryState(currentVal => {
-            currentVal.breeds = currentVal.breeds.filter(element => element.id !== id)
-            return currentVal;
-        });
-    }
+        setCategoryState((cur) => ({ ...cur, breeds: cur.breeds.filter((b) => b.id !== id) }));
+    };
 
     const setBreedName = (id: number, name: string) => {
-        setCategoryState(currentVal => {
-            currentVal.breeds = currentVal.breeds.map(breed => breed.id !== id ? breed : { id: breed.id, name: name })
-            return currentVal;
-        });
-    }
+        setCategoryState((cur) => ({ ...cur, breeds: cur.breeds.map((breed) => breed.id !== id ? breed : { id: breed.id, name }) }));
+    };
 
     const setCategoryName = (newName: string) => {
-        setCategoryState(currentVal => {
-            currentVal.name = newName;
-            return currentVal;
-        }
-        )
-    }
+        setCategoryState((cur) => ({ ...cur, name: newName }));
+    };
+
+    const resetChanges = () => {
+        setCategoryState(originalRef.current);
+    };
 
     return (
         <Table.Tr key={category.id}>
@@ -122,8 +135,8 @@ export function CategoryRow(
             </Table.Td>
             <Table.Td>
                 <BreedList
-                    categoryId={category.id}
-                    breeds={category.breeds}
+                    categoryId={categoryState.id}
+                    breeds={categoryState.breeds}
                     setBreedName={setBreedName}
                     addBreed={addBreed}
                     deleteBreed={removeBreed}
@@ -138,9 +151,14 @@ export function CategoryRow(
                         </Button>
                     </Grid.Col>
                     <Grid.Col hidden={!isDirty}>
-                        <Button size="xs" onClick={submitChanges} loading={submitting}>
-                            Save
-                        </Button>
+                        <Group>
+                            <Button size="xs" onClick={resetChanges} disabled={submitting}>
+                                Reset
+                            </Button>
+                            <Button size="xs" onClick={submitChanges} loading={submitting}>
+                                Save
+                            </Button>
+                        </Group>
                     </Grid.Col>
                 </Grid>
             </Table.Td>
