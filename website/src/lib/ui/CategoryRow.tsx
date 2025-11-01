@@ -2,7 +2,7 @@ import { Table, TextInput, Button, Group, Grid } from "@mantine/core";
 import { ErrorResponseZod, type CategoryResponse, type ErrorResponse } from "../dtos/responses";
 import { useState, useRef, useEffect } from "react";
 import { API_BASE_URL } from "../../App";
-import BreedList from "./breed_list";
+import BreedList from "./BreedList";
 
 interface CategoryRowProps {
     category: CategoryResponse;

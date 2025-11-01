@@ -130,7 +130,6 @@ export default function BreedList({ categoryId, breedList, changeBreedList, subm
             }
         };
 
-
         return (
             <>
 
@@ -141,9 +140,14 @@ export default function BreedList({ categoryId, breedList, changeBreedList, subm
                 </Card>
                 {
                     breedNameEdited !== originalValue.name &&
+                    <>
                     <Button onClick={() => updateBreedName(originalValue.id, breedNameEdited)}>
-                        hello there
+                        Update
                     </Button>
+                    <Button onClick={() => setBreedText(originalValue.name)}>
+                        Reset
+                    </Button>
+                    </>
                 }
             </>
         );

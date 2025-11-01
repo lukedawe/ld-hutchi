@@ -7,7 +7,7 @@ import { notifications, Notifications } from '@mantine/notifications'
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
 import { useFetch } from '@mantine/hooks'
-import { CategoryRow } from './lib/ui/table_row'
+import { CategoryRow } from './lib/ui/CategoryRow'
 
 const theme = createTheme({
   /** Put your mantine theme override here */
