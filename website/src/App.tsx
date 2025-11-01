@@ -95,6 +95,7 @@ function App() {
         }
         const responseJson = await res.json();
         const response = CategoryResponseZod.parse(responseJson) as CategoryResponse;
+        console.log(responseJson);
         setCategories((current) => {
           current.set(response.id, response);
           return new Map(current);

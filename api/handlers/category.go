@@ -97,7 +97,7 @@ func (h *Handler) PostCategory(c *gin.Context) {
 
 	categoryModel := addCategoryRequestToModel(body)
 	// Send to the database
-	if err := services.CreateCategory(h.DB, c, categoryModel); err != nil {
+	if err := services.CreateCategory(h.DB, c, &categoryModel); err != nil {
 		c.Error(services.TranslateDbError(err))
 		return
 	}

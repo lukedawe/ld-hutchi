@@ -27,8 +27,8 @@ func GetCategoryById(db *gorm.DB, c context.Context, id uint) (models.Category, 
 		First(c)
 }
 
-func CreateCategory(db *gorm.DB, c context.Context, category models.Category) error {
-	return gorm.G[models.Category](db).Create(c, &category)
+func CreateCategory(db *gorm.DB, c context.Context, category *models.Category) error {
+	return gorm.G[models.Category](db).Create(c, category)
 }
 
 func CreateCategories(db *gorm.DB, c context.Context, category []models.Category) error {
