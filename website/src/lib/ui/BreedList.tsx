@@ -131,21 +131,16 @@ export default function BreedList({ categoryId, breedList, changeBreedList, subm
 
         return (
             <>
-
-                <Card shadow="sm" padding="lg">
-                    <Card.Section>
-                        <TextInput disabled={submitting} value={breedNameEdited} onChange={(event) => setBreedText(event.target.value)} />
-                    </Card.Section>
-                </Card>
+                <TextInput disabled={submitting} value={breedNameEdited} onChange={(event) => setBreedText(event.target.value)} />
                 {
                     breedNameEdited !== originalValue.name &&
                     <>
-                    <Button onClick={() => updateBreedName(originalValue.id, breedNameEdited)}>
-                        Update
-                    </Button>
-                    <Button onClick={() => setBreedText(originalValue.name)}>
-                        Reset
-                    </Button>
+                        <Button onClick={() => updateBreedName(originalValue.id, breedNameEdited)}>
+                            Update
+                        </Button>
+                        <Button onClick={() => setBreedText(originalValue.name)}>
+                            Reset
+                        </Button>
                     </>
                 }
             </>
@@ -166,25 +161,17 @@ export default function BreedList({ categoryId, breedList, changeBreedList, subm
                 </Card>
             </Modal>
             {breedList.map((breed) => (
-                <Grid key={breed.id} mt="md" align="center">
-                    <Grid.Col span={8}>
-                        <BreedCard
-                            originalValue={breed}
-                        />
-                    </Grid.Col>
-                    <Grid.Col span={4}>
-                        <Group>
-                            <Button color="red" size="xs" onClick={() => removeBreedRequest(breed.id)}>
-                                Remove
-                            </Button>
-                        </Group>
-                    </Grid.Col>
-                </Grid>
-            ))}
-
-            <Group mt="md">
-                <Button onClick={() => open()} variant="filled" radius="lg" size="xs" disabled={submitting}>Add Breed</Button>
-            </Group>
+                <Group>
+                    <BreedCard
+                        originalValue={breed}
+                    />
+                    <Button color="red" size="xs" onClick={() => removeBreedRequest(breed.id)}>
+                        Remove
+                    </Button>
+                </Group>
+            )
+        )}
+        <Button onClick={() => open()} variant="filled" radius="lg" size="xs" disabled={submitting}>Add Breed</Button>
         </>
     );
 }
