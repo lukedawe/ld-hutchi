@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, createContext } from 'react'
 import './App.css'
 import './lib/dtos/responses'
 import type { CategoryResponse } from './lib/dtos/responses'
@@ -38,6 +38,8 @@ function App() {
     ),
     [data]
   )
+
+  // TODO: Be able to display errors and info via context instead of via callbacks 
 
   const setMessage = (message: string) => notifications.show({ title: "Success!", message: message });
   const setError = (errorMessage: string) => notifications.show({ title: "Error occurred", message: errorMessage });

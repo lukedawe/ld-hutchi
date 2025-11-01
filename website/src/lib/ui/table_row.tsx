@@ -1,9 +1,8 @@
 import { Table, TextInput, Button, Group, Grid } from "@mantine/core";
-import { BreedResponseZod, CategoryResponseZod, ErrorResponseZod, type BreedResponse, type CategoryResponse, type ErrorResponse } from "../dtos/responses";
+import { ErrorResponseZod, type CategoryResponse, type ErrorResponse } from "../dtos/responses";
 import { useState, useRef, useEffect } from "react";
 import { API_BASE_URL } from "../../App";
 import BreedList from "./breed_list";
-import type { AddBreed } from "../dtos/requests/breed";
 
 interface CategoryRowProps {
     category: CategoryResponse;
@@ -25,9 +24,10 @@ export function CategoryRow({ category, deleteCategorySuccessful, setError, setM
                 const errorMessage = ErrorResponseZod.safeParse(await res.json())
                 if (errorMessage.success) {
                     setError((errorMessage.data as ErrorResponse).message)
-                    return;
                 }
                 else setError("Unexpected result");
+
+                return;
             }
             deleteCategorySuccessful(category.id);
             setMessage('Category deleted');
@@ -38,67 +38,6 @@ export function CategoryRow({ category, deleteCategorySuccessful, setError, setM
         } finally {
             setSubmitting(false);
         }
-    };
-
-    // Add a new breed by POSTing to the API and appending the returned breed
-    const addBreedRequest = async (request: AddBreed) => {
-        setSubmitting(true);
-        try {
-            const res = await fetch(`${API_BASE_URL}/breed`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(request),
-            });
-            if (!res.ok) {
-                const errorMessage = ErrorResponseZod.safeParse(await res.json())
-                if (errorMessage.success) {
-                    setError((errorMessage.data as ErrorResponse).message);
-                    return;
-                }
-                else setError("Unexpected result");
-            }
-            const breedResponseJson = await res.json();
-            const breedResponse = BreedResponseZod.parse(breedResponseJson);
-            setCategoryState({ ...category, breeds: [...category.breeds, breedResponse as BreedResponse] });
-            setMessage('Breed added');
-        } catch (err) {
-            console.error('addBreed error', err);
-            const message = err instanceof Error ? err.message : String(err);
-            setError(message);
-        } finally {
-            setSubmitting(false);
-        }
-    };
-
-    const removeBreedRequest = async (id: number) => {
-        setSubmitting(true);
-
-        try {
-            const res = await fetch(`${API_BASE_URL}/breed`, {
-                method: 'DELETE',
-            });
-            if (!res.ok) {
-                const errorMessage = ErrorResponseZod.safeParse(await res.json())
-                if (errorMessage.success) {
-                    setError((errorMessage.data as ErrorResponse).message)
-                    return;
-                }
-                else setError("Unexpected result");
-            }
-            setCategoryState({ ...category, breeds: category.breeds.filter((b) => b.id !== id) });
-        } catch (err) {
-            console.error('addBreed error', err);
-            const message = err instanceof Error ? err.message : String(err);
-            setError(message);
-        } finally {
-            setSubmitting(false);
-        }
-        
-    };
-
-    const setBreedName = (id: number, name: string) => {
-        // TODO: Add sending request here.
-        setCategoryState({ ...category, breeds: category.breeds.map((breed) => breed.id !== id ? breed : { id: breed.id, name }) });
     };
 
     const updateCategoryName = (newName: string) => {
@@ -140,11 +79,10 @@ export function CategoryRow({ category, deleteCategorySuccessful, setError, setM
             <Table.Td>
                 <BreedList
                     categoryId={category.id}
-                    breeds={category.breeds}
-                    setBreedName={setBreedName}
-                    addBreed={(request) => addBreedRequest(request)}
-                    deleteBreed={removeBreedRequest}
-                    isLoading={submitting}
+                    breedList={category.breeds}
+                    changeBreedList={(newBreeds) => setCategoryState({ ...category, breeds: newBreeds })}
+                    submitting={submitting}
+                    setSubmitting={setSubmitting}
                 />
             </Table.Td>
             <Table.Td>
