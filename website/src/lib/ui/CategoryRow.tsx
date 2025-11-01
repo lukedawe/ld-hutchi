@@ -15,6 +15,7 @@ interface CategoryRowProps {
 export function CategoryRow({ category, deleteCategorySuccessful, setError, setMessage, setCategoryState }: CategoryRowProps) {
     // local editable state; keep original for reset
     const [submitting, setSubmitting] = useState(false);
+    const [categoryNameTextFieldValue, setCategoryNameTextFieldValue] = useState(category.name)
 
     const deleteCategoryRequest = async () => {
         setSubmitting(true);
@@ -40,14 +41,36 @@ export function CategoryRow({ category, deleteCategorySuccessful, setError, setM
         }
     };
 
-    const updateCategoryName = (newName: string) => {
-        // Run query 
+    const updateCategoryNameRequest = async (newName: string) => {
+        setSubmitting(true);
+        try {
+            const res = await fetch(`${API_BASE_URL}/category/${category.id}`,
+                {
+                    method: 'UPDATE',
+                    body: JSON.stringify(
+                        {
+                            name: newName,
+                        }
+                    )
+                });
+            if (!res.ok) {
+                const errorMessage = ErrorResponseZod.safeParse(await res.json())
+                if (errorMessage.success) {
+                    setError((errorMessage.data as ErrorResponse).message)
+                }
+                else setError("Unexpected result");
 
-        setCategoryState({ ...category, name: newName });
-    };
-
-    const resetChanges = () => {
-        // setCategoryState(originalRef.current);
+                return;
+            }
+            setCategoryState({ ...category, name: newName })
+            setMessage('Category deleted');
+        } catch (err) {
+            console.error('delete category error', err);
+            const message = err instanceof Error ? err.message : String(err);
+            setError(message);
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     // Reset text fields when new category state is pushed.
@@ -57,8 +80,6 @@ export function CategoryRow({ category, deleteCategorySuccessful, setError, setM
         },
         [category]
     )
-
-    const [categoryNameTextFieldValue, setCategoryNameTextFieldValue] = useState(category.name)
 
     return (
         <Table.Tr key={category.id}>
@@ -70,9 +91,14 @@ export function CategoryRow({ category, deleteCategorySuccessful, setError, setM
                     />
                     {
                         categoryNameTextFieldValue !== category.name &&
-                        <Button onClick={() => updateCategoryName(categoryNameTextFieldValue)}>
-                            Submit changes
-                        </Button>
+                        <>
+                            <Button onClick={() => updateCategoryNameRequest(categoryNameTextFieldValue)}>
+                                Submit changes
+                            </Button>
+                            <Button onClick={() => setCategoryNameTextFieldValue(category.name)}>
+                                Reset
+                            </Button>
+                        </>
                     }
                 </Group>
             </Table.Td>

@@ -28,7 +28,7 @@ export default function BreedList({ categoryId, breedList, changeBreedList, subm
 
     const setMessage = (message: string) => {
         notifications.show({
-            title: "Something went wrong",
+            title: "Success!",
             message: message
         })
     }
@@ -65,9 +65,8 @@ export default function BreedList({ categoryId, breedList, changeBreedList, subm
 
     const removeBreedRequest = async (id: number) => {
         setSubmitting(true);
-
         try {
-            const res = await fetch(`${API_BASE_URL}/breed`, {
+            const res = await fetch(`${API_BASE_URL}/breed/${id}`, {
                 method: 'DELETE',
             });
             if (!res.ok) {
@@ -79,6 +78,7 @@ export default function BreedList({ categoryId, breedList, changeBreedList, subm
                 return;
             }
             changeBreedList(breedList.filter((b) => b.id !== id))
+            setMessage("Breed deleted.")
         } catch (err) {
             console.error('addBreed error', err);
             const message = err instanceof Error ? err.message : String(err);
@@ -92,7 +92,6 @@ export default function BreedList({ categoryId, breedList, changeBreedList, subm
 
     function BreedCard({ originalValue }: { originalValue: BreedResponse }) {
         const [breedNameEdited, setBreedText] = useState(originalValue.name)
-
 
         const updateBreedName = async (id: number, name: string) => {
             setSubmitting(true);
