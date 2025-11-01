@@ -97,7 +97,7 @@ export default function BreedList({ categoryId, breedList, changeBreedList, subm
             setSubmitting(true);
             try {
                 const res = await fetch(`${API_BASE_URL}/breed/${id}`, {
-                    method: 'UPDATE',
+                    method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(
                         {

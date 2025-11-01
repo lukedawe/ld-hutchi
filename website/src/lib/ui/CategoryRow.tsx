@@ -46,7 +46,8 @@ export function CategoryRow({ category, deleteCategorySuccessful, setError, setM
         try {
             const res = await fetch(`${API_BASE_URL}/category/${category.id}`,
                 {
-                    method: 'UPDATE',
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(
                         {
                             name: newName,

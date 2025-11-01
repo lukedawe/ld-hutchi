@@ -1,12 +1,13 @@
-import { useState, useEffect, createContext } from 'react'
-import './App.css'
-import './lib/dtos/responses'
-import type { CategoryResponse } from './lib/dtos/responses'
-import { createTheme, Group, MantineProvider, Table, type NotificationProps } from '@mantine/core'
+import { Button, createTheme, Group, MantineProvider, Modal, Table, Text, TextInput } from '@mantine/core'
+import '@mantine/core/styles.css'
+import { useDisclosure, useFetch } from '@mantine/hooks'
 import { notifications, Notifications } from '@mantine/notifications'
-import '@mantine/core/styles.css';
-import '@mantine/notifications/styles.css';
-import { useFetch } from '@mantine/hooks'
+import '@mantine/notifications/styles.css'
+import { useEffect, useState } from 'react'
+import './App.css'
+import type { AddCategoryJson } from './lib/dtos/requests/category'
+import './lib/dtos/responses'
+import { CategoryResponseZod, ErrorResponseZod, type CategoryResponse, type ErrorResponse } from './lib/dtos/responses'
 import { CategoryRow } from './lib/ui/CategoryRow'
 
 const theme = createTheme({
@@ -28,16 +29,19 @@ function App() {
     )
     )
   )
+  // Add category modal.
+  const [opened, { open, close }] = useDisclosure(false);
+
 
   useEffect(() =>
     setCategories(
       new Map(data?.map(
         item => [item.id, item] as const
-      )
-      )
+      ))
     ),
     [data]
   )
+
   const setMessage = (message: string) => notifications.show({ title: "Success!", message: message });
   const setError = (errorMessage: string) => notifications.show({ title: "Error occurred", message: errorMessage });
 
@@ -70,8 +74,64 @@ function App() {
     refetch();
   }, [currentPage]);
 
+  function AddCategoryModal() {
+    const createCategory = async (newCat: AddCategoryJson) => {
+      setLoading(true);
+      try {
+        const res = await fetch(`${API_BASE_URL}/category`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newCat)
+          });
+        if (!res.ok) {
+          const errorMessage = ErrorResponseZod.safeParse(await res.json())
+          if (errorMessage.success) {
+            setError((errorMessage.data as ErrorResponse).message)
+          }
+          else setError("Unexpected result");
+
+          return;
+        }
+        const responseJson = await res.json();
+        const response = CategoryResponseZod.parse(responseJson) as CategoryResponse;
+        setCategories((current) => {
+          current.set(response.id, response);
+          return new Map(current);
+        });
+        setMessage('Category created');
+      } catch (err) {
+        console.error('delete category error', err);
+        const message = err instanceof Error ? err.message : String(err);
+        setError(message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    const [loading, setLoading] = useState(false)
+    const [newCategoryName, setNewCategoryName] = useState("");
+    return (
+      <Modal opened={opened} onClose={close} title="Add Category">
+        <Group>
+          <Text>
+            New category name:
+          </Text>
+          <TextInput placeholder='Woof' value={newCategoryName} onChange={(e) => setNewCategoryName(e.target.value)} />
+          <Button loading={loading} onClick={() => createCategory({ name: newCategoryName, breeds: [] })}>
+            Submit
+          </Button>
+        </Group>
+      </Modal>
+    )
+  }
+
   return (
     <MantineProvider theme={theme}>
+      <AddCategoryModal></AddCategoryModal>
+      <Button onClick={refetch} loading={loading}>
+        Reload
+      </Button>
       <Notifications />
       {data ?
         <>
@@ -92,23 +152,9 @@ function App() {
             <Table.Tbody>{rows}</Table.Tbody>
           </Table>
           <Group mt="md">
-            {/* // TODO: Remove this.
-            <Button onClick={async () => {
-              // create a new category with an empty name, then add to map when server responds
-              try {
-                const res = await fetch(`${API_BASE_URL}/category`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: "" }) });
-                if (!res.ok) throw new Error(`Create category failed ${res.status}`);
-                const payload = await res.json();
-                const created: CategoryResponse = { id: payload.id ?? Date.now(), name: String(payload.name ?? ""), breeds: payload.breeds ?? [] };
-                setCategories((prev) => new Map(prev).set(created.id, created));
-                setMessage('Category created');
-              } catch (err) {
-                const message = err instanceof Error ? err.message : String(err);
-                setError(message);
-              }
-            }}>
+            <Button onClick={open}>
               Add Category
-            </Button> */}
+            </Button>
           </Group>
         </>
         : null}
