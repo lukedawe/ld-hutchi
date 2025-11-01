@@ -8,6 +8,12 @@ export const BreedResponseZod = z.object({
     name: z.string(),
 });
 
+export const BreedCreatedResponseZod = z.object({
+    id: z.number(),
+    name: z.string(),
+    category_id: z.number(),
+})
+
 export const CategoryResponseZod = z.object({
     id: z.number(),
     name: z.string(),
@@ -22,3 +28,4 @@ export const ErrorResponseZod = z.object({
 export type CategoryResponse = z.infer<typeof CategoryResponseZod>;
 export type BreedResponse = z.infer<typeof BreedResponseZod>;
 export type ErrorResponse = z.infer<typeof ErrorResponseZod>;
+export type BreedCreatedResponse = z.infer<typeof BreedCreatedResponseZod>;

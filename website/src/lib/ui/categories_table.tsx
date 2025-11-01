@@ -30,7 +30,7 @@ export default function CategoriesTable(
     });
 
     const rows = Array.from(categoryMap.values()).map((category) => (
-        <CategoryRow key={category.id} category={category} deleteCategory={deleteCategory} setError={setError} setMessage={setMessage} />
+        <CategoryRow key={category.id} category={category} deleteCategorySuccessful={deleteCategory} setError={setError} setMessage={setMessage} />
     ));
 
     return (
