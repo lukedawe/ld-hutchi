@@ -7,55 +7,20 @@ import type { AddBreed } from "../dtos/requests/breed";
 
 interface CategoryRowProps {
     category: CategoryResponse;
-    deleteCategorySuccessful: (CategoryId: number) => void;
+    deleteCategorySuccessful: (id: number) => void;
+    setCategoryState: (change: CategoryResponse) => void;
     setError: (error: string) => void;
     setMessage: (message: string) => void;
 }
 
-export function CategoryRow({ category, deleteCategorySuccessful: deleteCategory, setError, setMessage }: CategoryRowProps) {
+export function CategoryRow({ category, deleteCategorySuccessful, setError, setMessage, setCategoryState }: CategoryRowProps) {
     // local editable state; keep original for reset
-    // const originalRef = useRef(category);
     const [submitting, setSubmitting] = useState(false);
-
-    // const submitChangesToCategoryRequest = async () => {
-    //     setSubmitting(true);
-    //     try {
-    //         const res = await fetch(`${API_BASE_URL}/category/${categoryState.id}`, {
-    //             method: 'PUT',
-    //             headers: { 'Content-Type': 'application/json' },
-    //             body: JSON.stringify({
-    //                 id: categoryState.id,
-    //                 name: categoryState.name,
-    //                 breeds: categoryState.breeds,
-    //             }),
-    //         });
-
-    //         if (!res.ok) {
-    //             const errorMessage = ErrorResponseZod.safeParse(await res.json())
-    //             if (errorMessage.success) {
-    //                 setError((errorMessage.data as ErrorResponse).message)
-    //                 return;
-    //             }
-    //             else setError("Unexpected result");
-    //         }
-
-    //         const responseJson = await res.json().catch(() => null);
-    //         const categoryResponse = CategoryResponseZod.parse(responseJson);
-    //         setCategoryState(categoryResponse as CategoryResponse);
-    //         setMessage('Category saved');
-    //     } catch (err) {
-    //         console.error('submit category error', err);
-    //         const message = err instanceof Error ? err.message : String(err);
-    //         setError(message);
-    //     } finally {
-    //         setSubmitting(false);
-    //     }
-    // };
 
     const deleteCategoryRequest = async () => {
         setSubmitting(true);
         try {
-            const res = await fetch(`${API_BASE_URL}/category/${originalRef.id}`, { method: 'DELETE' });
+            const res = await fetch(`${API_BASE_URL}/category/${category.id}`, { method: 'DELETE' });
             if (!res.ok) {
                 const errorMessage = ErrorResponseZod.safeParse(await res.json())
                 if (errorMessage.success) {
@@ -64,7 +29,7 @@ export function CategoryRow({ category, deleteCategorySuccessful: deleteCategory
                 }
                 else setError("Unexpected result");
             }
-            deleteCategory(category.id);
+            deleteCategorySuccessful(category.id);
             setMessage('Category deleted');
         } catch (err) {
             console.error('delete category error', err);
@@ -94,7 +59,7 @@ export function CategoryRow({ category, deleteCategorySuccessful: deleteCategory
             }
             const breedResponseJson = await res.json();
             const breedResponse = BreedResponseZod.parse(breedResponseJson);
-            setCategoryState((cur) => ({ ...cur, breeds: [...cur.breeds, breedResponse as BreedResponse] }));
+            setCategoryState({ ...category, breeds: [...category.breeds, breedResponse as BreedResponse] });
             setMessage('Breed added');
         } catch (err) {
             console.error('addBreed error', err);
@@ -120,7 +85,7 @@ export function CategoryRow({ category, deleteCategorySuccessful: deleteCategory
                 }
                 else setError("Unexpected result");
             }
-            setCategoryState((cur) => ({ ...cur, breeds: cur.breeds.filter((b) => b.id !== id) }));
+            setCategoryState({ ...category, breeds: category.breeds.filter((b) => b.id !== id) });
         } catch (err) {
             console.error('addBreed error', err);
             const message = err instanceof Error ? err.message : String(err);
@@ -133,31 +98,49 @@ export function CategoryRow({ category, deleteCategorySuccessful: deleteCategory
 
     const setBreedName = (id: number, name: string) => {
         // TODO: Add sending request here.
-        setCategoryState((cur) => ({ ...cur, breeds: cur.breeds.map((breed) => breed.id !== id ? breed : { id: breed.id, name }) }));
+        setCategoryState({ ...category, breeds: category.breeds.map((breed) => breed.id !== id ? breed : { id: breed.id, name }) });
     };
 
-    const setCategoryName = (newName: string) => {
-        setCategoryState((cur) => ({ ...cur, name: newName }));
+    const updateCategoryName = (newName: string) => {
+        // Run query 
+
+        setCategoryState({ ...category, name: newName });
     };
 
     const resetChanges = () => {
-        setCategoryState(originalRef.current);
+        // setCategoryState(originalRef.current);
     };
+
+    // Reset text fields when new category state is pushed.
+    useEffect(
+        () => {
+            setCategoryNameTextFieldValue(category.name);
+        },
+        [category]
+    )
+
+    const [categoryNameTextFieldValue, setCategoryNameTextFieldValue] = useState(category.name)
 
     return (
         <Table.Tr key={category.id}>
             <Table.Td>
                 <Group align="center">
                     <TextInput
-                        value={categoryState.name}
-                        onChange={(e) => setCategoryName(e.currentTarget.value)}
+                        value={categoryNameTextFieldValue}
+                        onChange={(e) => setCategoryNameTextFieldValue(e.currentTarget.value)}
                     />
+                    {
+                        categoryNameTextFieldValue !== category.name &&
+                        <Button onClick={() => updateCategoryName(categoryNameTextFieldValue)}>
+                            Submit changes
+                        </Button>
+                    }
                 </Group>
             </Table.Td>
             <Table.Td>
                 <BreedList
-                    categoryId={categoryState.id}
-                    breeds={categoryState.breeds}
+                    categoryId={category.id}
+                    breeds={category.breeds}
                     setBreedName={setBreedName}
                     addBreed={(request) => addBreedRequest(request)}
                     deleteBreed={removeBreedRequest}
@@ -171,7 +154,7 @@ export function CategoryRow({ category, deleteCategorySuccessful: deleteCategory
                             Delete
                         </Button>
                     </Grid.Col>
-                    <Grid.Col hidden={!isDirty}>
+                    {/* <Grid.Col hidden={!isDirty}>
                         <Group>
                             <Button size="xs" onClick={resetChanges} disabled={submitting}>
                                 Reset
@@ -180,7 +163,7 @@ export function CategoryRow({ category, deleteCategorySuccessful: deleteCategory
                                 Save
                             </Button>
                         </Group>
-                    </Grid.Col>
+                    </Grid.Col> */}
                 </Grid>
             </Table.Td>
         </Table.Tr>
