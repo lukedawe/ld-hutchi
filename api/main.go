@@ -11,18 +11,13 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 const v1Route = "v1"
 
-func connectDB(envFile string) *sql.DB {
-	if err := godotenv.Load(envFile); err != nil {
-		log.Fatalln(err.Error())
-	}
-
+func connectDB() *sql.DB {
 	port, err := strconv.Atoi(os.Getenv("DB_PORT"))
 	if err != nil {
 		log.Fatalln(port)
@@ -113,14 +108,7 @@ func setupRouter(DB *sql.DB) *gin.Engine {
 }
 
 func main() {
-	var envFileName string
-	if gin.IsDebugging() {
-		envFileName = "dev.env"
-	} else {
-		envFileName = ".env"
-	}
-
-	DB := connectDB(envFileName)
+	DB := connectDB()
 
 	if DB == nil {
 		log.Fatalln("DB connection is nil")

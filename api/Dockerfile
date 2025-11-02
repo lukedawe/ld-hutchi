@@ -16,8 +16,6 @@ WORKDIR /app
 
 COPY --from=build /app/api ./
 
-COPY .env .
-
 ENV GIN_MODE=release
 
 CMD [ "./api" ]
