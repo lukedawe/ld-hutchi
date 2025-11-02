@@ -14,12 +14,6 @@ import (
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-
-	docs "lukedawe/hutchi/docs"
-
-	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
-	// swagger embed files
-	swaggerfiles "github.com/swaggo/files"
 )
 
 const v1Route = "v1"
@@ -76,7 +70,6 @@ func setupRouter(DB *sql.DB) *gin.Engine {
 	r := gin.Default()
 	// Register middleware before roots
 	r.Use(handlers.ErrorHandler())
-	docs.SwaggerInfo.BasePath = v1Route
 
 	h := &handlers.Handler{DB: getGormDb(DB)}
 
@@ -94,9 +87,6 @@ func setupRouter(DB *sql.DB) *gin.Engine {
 		the data stored within the database is not sensitive, it makes querying a lot
 		easier.
 	*/
-
-	// Docs for the API
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	v1.GET("/breeds/categories/:page/:page_size", h.GetCategoriesToBreeds) // Get all categories mapped to breeds (paginated).
 	v1.GET("/categories", h.GetCategories)                                 // Get all categories (without breed information).

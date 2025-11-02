@@ -13,15 +13,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// @BasePath v1
-
-// @Summary Get breed by ID.
-// @Schemes
-// @Description Get the breed by the ID.
-// @Tags breeds
-// @Produce json
-// @Success 200 {object} []responses.BreedWithCategory
-// @Router /breed/{id} [get]
 func (h *Handler) GetBreed(c *gin.Context) {
 	var body requests.GetBreed
 	if err := c.ShouldBindUri(&body); err != nil {
@@ -48,6 +39,13 @@ func (h *Handler) GetBreed(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+// @Summary Create breed by ID.
+// @Schemes
+// @Description Create breed by ID.
+// @Tags breeds
+// @Produce json
+// @Success 200 {object} []responses.BreedWithCategory
+// @Router /breed/{id} [get]
 func (h *Handler) PostBreed(c *gin.Context) {
 	var body requests.AddBreed
 	if err := requests.ValidateRequestAndBindJson(c, &body); err != nil {
