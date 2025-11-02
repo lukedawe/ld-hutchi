@@ -10,14 +10,15 @@ COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o api
 
-FROM golang:latest
+FROM alpine:latest
 
 WORKDIR /app
 
 COPY --from=build /app/api ./
 
-ENV GIN_MODE=release
-
-CMD [ "./api" ]
+RUN adduser -D api_user
+USER api_user
 
 EXPOSE 8080
+
+CMD [ "./api" ]

@@ -20,7 +20,7 @@ const v1Route = "v1"
 func connectDB() *sql.DB {
 	port, err := strconv.Atoi(os.Getenv("DB_PORT"))
 	if err != nil {
-		log.Fatalln(port)
+		log.Fatalln("Port convertion to number did not work: ", port)
 	}
 
 	dsn := util.GetDsn(
