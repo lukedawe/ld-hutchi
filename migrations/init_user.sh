@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -e
+
+source /run/secrets/pg.env
+
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
+	CREATE USER api_user WITH ENCRYPTED PASSWORD '$(echo "$API_USER_PASSWORD")';
+	CREATE DATABASE dogs;
+	GRANT ALL PRIVILEGES ON DATABASE dogs TO api_user;
+EOSQL

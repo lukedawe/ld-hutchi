@@ -4,7 +4,10 @@ go 1.25.3
 
 require google.golang.org/protobuf v1.36.10 // indirect
 
-require github.com/bytedance/gopkg v0.1.3 // indirect
+require (
+	github.com/bytedance/gopkg v0.1.3 // indirect
+	github.com/joho/godotenv v1.5.1 // indirect
+)
 
 require (
 	github.com/bytedance/sonic v1.14.2 // indirect

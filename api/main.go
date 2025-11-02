@@ -11,13 +11,21 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-const v1Route = "v1"
+const (
+	v1Route             = "v1"
+	envFileVariableName = "ENV_FILE"
+)
 
-func connectDB() *sql.DB {
+func connectDB(envFile string) *sql.DB {
+	if err := godotenv.Load(envFile); err != nil {
+		log.Fatalln(err.Error())
+	}
+
 	port, err := strconv.Atoi(os.Getenv("DB_PORT"))
 	if err != nil {
 		log.Fatalln("Port convertion to number did not work: ", port)
@@ -108,7 +116,12 @@ func setupRouter(DB *sql.DB) *gin.Engine {
 }
 
 func main() {
-	DB := connectDB()
+	envFile, ok := os.LookupEnv(envFileVariableName)
+	if !ok {
+		log.Fatalln(envFileVariableName, " environment variable was not found.")
+	}
+
+	DB := connectDB(envFile)
 
 	if DB == nil {
 		log.Fatalln("DB connection is nil")
