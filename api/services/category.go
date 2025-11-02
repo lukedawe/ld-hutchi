@@ -9,6 +9,10 @@ import (
 	"gorm.io/gorm/clause"
 )
 
+func GetCategoryCount(db *gorm.DB, c context.Context) (int64, error) {
+	return gorm.G[models.Category](db).Count(c, "id")
+}
+
 func GetCategories(db *gorm.DB, c context.Context) ([]models.Category, error) {
 	return gorm.G[models.Category](db).Find(c)
 }

@@ -1,13 +1,13 @@
-import { Button, createTheme, Group, MantineProvider, Modal, Table, Text, TextInput } from '@mantine/core'
+import { Button, createTheme, Group, MantineProvider, Modal, Pagination, Table, Text, TextInput } from '@mantine/core'
 import '@mantine/core/styles.css'
-import { useDisclosure, useFetch } from '@mantine/hooks'
+import { useDisclosure, useFetch, usePagination } from '@mantine/hooks'
 import { notifications, Notifications } from '@mantine/notifications'
 import '@mantine/notifications/styles.css'
 import { useEffect, useState } from 'react'
 import './App.css'
 import type { AddCategoryJson } from './lib/dtos/requests/category'
 import './lib/dtos/responses'
-import { CategoryResponseZod, ErrorResponseZod, type CategoryResponse, type ErrorResponse } from './lib/dtos/responses'
+import { CategoryResponsePaginated, CategoryResponseZod, ErrorResponseZod, type CategoryResponse, type ErrorResponse } from './lib/dtos/responses'
 import { CategoryRow } from './lib/ui/CategoryRow'
 
 const theme = createTheme({
@@ -18,13 +18,20 @@ export const API_BASE_URL = 'http://localhost:5173/services/v1'
 
 function App() {
   const [currentPage, setCurrentPage] = useState(1);
-  const { data, loading, error, refetch, abort } = useFetch<CategoryResponse[]>(
-    `${API_BASE_URL}/breeds/categories/` + currentPage + "/" + 100,
+  const { data, loading, error, refetch, abort } = useFetch<CategoryResponsePaginated>(
+    `${API_BASE_URL}/breeds/categories/` + currentPage + "/" + 20,
     { autoInvoke: true }
   )
 
+  useEffect(
+    () => {
+      refetch();
+    },
+    [currentPage]
+  )
+
   const [categories, setCategories] = useState(
-    new Map(data?.map(
+    new Map(data?.categories?.map(
       item => [item.id, item] as const
     )
     )
@@ -32,10 +39,9 @@ function App() {
   // Add category modal.
   const [opened, { open, close }] = useDisclosure(false);
 
-
   useEffect(() =>
     setCategories(
-      new Map(data?.map(
+      new Map(data?.categories.map(
         item => [item.id, item] as const
       ))
     ),
@@ -49,7 +55,6 @@ function App() {
     console.log("Something went wrong with fetching from the server.");
   }
 
-  // const deleteCategorySuccess = (transform : (prev: CategoryResponse[])=>CategoryResponse[]) => setCategories((prev) => (transform(prev)));
   const deleteCategory = (id: number) => {
     setCategories(prev => {
       prev.delete(id)
@@ -159,6 +164,7 @@ function App() {
           </Group>
         </>
         : null}
+      <Pagination total={data?.no_pages ?? 0} onChange={(pageNo) => {setCurrentPage(pageNo)}}/>
     </MantineProvider>
   )
 }

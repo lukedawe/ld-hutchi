@@ -11,6 +11,12 @@ type CategoryCreated struct {
 	Breeds []CategoryBreed `json:"breeds"`
 }
 
+type CategoryResponsePaginaged struct {
+	Categories []CategoryCreated `json:"categories"`
+	PageSize   uint              `json:"page_size"`
+	NoPages    int64             `json:"no_pages"`
+}
+
 type CategoriesCreated struct {
 	Categories []CategoryCreated `json:"categories"`
 }

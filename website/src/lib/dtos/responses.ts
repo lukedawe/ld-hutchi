@@ -15,11 +15,18 @@ export const CategoryResponseZod = z.object({
     breeds: z.array(BreedResponseZod)
 });
 
+export const CategoryResponsePaginated = z.object({
+    categories: z.array(CategoryResponseZod),
+    no_pages: z.number(),
+    page_size: z.number()
+})
+
 export const ErrorResponseZod = z.object({
     code: z.string(),
     message: z.string(),
 })
 
 export type CategoryResponse = z.infer<typeof CategoryResponseZod>;
+export type CategoryResponsePaginated = z.infer<typeof CategoryResponsePaginated>;
 export type BreedResponse = z.infer<typeof BreedResponseZod>;
 export type ErrorResponse = z.infer<typeof ErrorResponseZod>;

@@ -7,6 +7,7 @@ import (
 	response_errors "lukedawe/hutchi/handlers/dtos/responses/errors"
 	"lukedawe/hutchi/models"
 	"lukedawe/hutchi/services"
+	"math"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -29,22 +30,33 @@ func (h *Handler) GetCategories(c *gin.Context) {
 
 // Paginated results for categories to breeds
 func (h *Handler) GetCategoriesToBreeds(c *gin.Context) {
-	var request requests.GetCategoriesToBreeds
-	if err := c.ShouldBindUri(&request); err != nil {
+	var uri requests.GetCategoriesToBreeds
+	if err := c.ShouldBindUri(&uri); err != nil {
 		c.Error(response_errors.ErrBadRequestBinding.SetError(err))
 		return
 	}
 
-	categories, err := services.GetCategoriesToBreeds(h.DB, c, request.Page, request.PageSize)
+	categories, err := services.GetCategoriesToBreeds(h.DB, c, uri.Page, uri.PageSize)
 	if err != nil {
 		c.Error(services.TranslateDbError(err))
 		return
 	}
 
-	response := make([]responses.CategoryCreated, len(categories))
+	var response responses.CategoryResponsePaginaged
+	response.Categories = make([]responses.CategoryCreated, len(categories))
 	for i, category := range categories {
-		response[i] = categoryModelToResponse(category)
+		response.Categories[i] = categoryModelToResponse(category)
 	}
+
+	rows, err := services.GetCategoryCount(h.DB, c)
+	if err != nil {
+		c.Error(services.TranslateDbError(err))
+		return
+	}
+
+	response.PageSize = uint(len(response.Categories))
+	pages := math.Ceil(float64(rows / int64(response.PageSize)))
+	response.NoPages = int64(pages)
 
 	c.JSON(http.StatusOK, response)
 }

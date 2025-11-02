@@ -1,7 +1,7 @@
-import { Button, Card, Grid, TextInput, Group, Modal, Text } from "@mantine/core";
+import { Button, TextInput, Group, Modal, Text } from "@mantine/core";
 import { BreedResponseZod, ErrorResponseZod, type BreedResponse, type ErrorResponse } from "../dtos/responses";
 import { useDisclosure } from "@mantine/hooks";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { type AddBreed } from "../dtos/requests/breed";
 import { notifications } from "@mantine/notifications";
 import { API_BASE_URL } from "../../App";
@@ -12,6 +12,10 @@ interface BreedListProps {
     changeBreedList: (newVal: BreedResponse[]) => void,
     submitting: boolean;
     setSubmitting: (loading: boolean) => void,
+}
+
+function validateBreedName(breedName: string): string | null {
+    return /^[a-z]+$/.test(breedName) ? null : "This is not a valid name";
 }
 
 export default function BreedList({ categoryId, breedList, changeBreedList, submitting, setSubmitting }: BreedListProps) {
@@ -89,7 +93,6 @@ export default function BreedList({ categoryId, breedList, changeBreedList, subm
 
     };
 
-
     function BreedCard({ originalValue }: { originalValue: BreedResponse }) {
         const [breedNameEdited, setBreedText] = useState(originalValue.name)
 
@@ -129,13 +132,20 @@ export default function BreedList({ categoryId, breedList, changeBreedList, subm
             }
         };
 
+        const [error, setError] = useState<string | null>(null)
+
+        const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+            setBreedText(event.target.value)
+            setError(validateBreedName(event.target.value))
+        }
+
         return (
             <>
-                <TextInput disabled={submitting} value={breedNameEdited} onChange={(event) => setBreedText(event.target.value)} />
+                <TextInput disabled={submitting} value={breedNameEdited} onChange={handleInput} error={error} />
                 {
                     breedNameEdited !== originalValue.name &&
                     <>
-                        <Button onClick={() => updateBreedName(originalValue.id, breedNameEdited)}>
+                        <Button disabled={error!==null} onClick={() => updateBreedName(originalValue.id, breedNameEdited)}>
                             Update
                         </Button>
                         <Button onClick={() => setBreedText(originalValue.name)}>
@@ -149,16 +159,16 @@ export default function BreedList({ categoryId, breedList, changeBreedList, subm
 
     return (
         <>
-            <Modal opened={opened} onClose={close} centered size="md" withCloseButton>
-                <Card>
+            <Modal opened={opened} onClose={close} centered size="md" withCloseButton title={"Add new breed"}>
+                <Group>
                     <Text>
-                        New breed name.
+                        New breed name:
                     </Text>
                     <TextInput value={modalTextState} onChange={event => setModalTextState(event.currentTarget.value)} />
                     <Button onClick={() => addBreedRequest({ name: modalTextState, category_id: categoryId })}>
                         Submit
                     </Button>
-                </Card>
+                </Group>
             </Modal>
             {breedList.map((breed) => (
                 <Group>
@@ -170,8 +180,8 @@ export default function BreedList({ categoryId, breedList, changeBreedList, subm
                     </Button>
                 </Group>
             )
-        )}
-        <Button onClick={() => open()} variant="filled" radius="lg" size="xs" disabled={submitting}>Add Breed</Button>
+            )}
+            <Button onClick={() => open()} variant="filled" radius="lg" size="xs" disabled={submitting}>Add Breed</Button>
         </>
     );
 }
