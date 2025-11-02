@@ -1,7 +1,7 @@
 import { Button, TextInput, Group, Modal, Text } from "@mantine/core";
 import { BreedResponseZod, ErrorResponseZod, type BreedResponse, type ErrorResponse } from "../dtos/responses";
 import { useDisclosure } from "@mantine/hooks";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { type AddBreed } from "../dtos/requests/breed";
 import { notifications } from "@mantine/notifications";
 import { API_BASE_URL } from "../../App";
@@ -15,7 +15,7 @@ interface BreedListProps {
 }
 
 function validateBreedName(breedName: string): string | null {
-    return /^[a-z]+$/.test(breedName) ? null : "This is not a valid name";
+    return /^[a-z]+$/.test(breedName) && breedName.length < 20 ? null : "This is not a valid name";
 }
 
 export default function BreedList({ categoryId, breedList, changeBreedList, submitting, setSubmitting }: BreedListProps) {

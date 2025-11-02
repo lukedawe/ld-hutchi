@@ -1,6 +1,6 @@
 import { Table, TextInput, Button, Group, Grid } from "@mantine/core";
 import { ErrorResponseZod, type CategoryResponse, type ErrorResponse } from "../dtos/responses";
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { API_BASE_URL } from "../../App";
 import BreedList from "./BreedList";
 
@@ -12,10 +12,15 @@ interface CategoryRowProps {
     setMessage: (message: string) => void;
 }
 
+function validateCategoryName(categoryName: string): string | null {
+    return /^[a-z]+$/.test(categoryName) && categoryName.length < 20 ? null : "This is not a valid name";
+}
+
 export function CategoryRow({ category, deleteCategorySuccessful, setError, setMessage, setCategoryState }: CategoryRowProps) {
     // local editable state; keep original for reset
     const [submitting, setSubmitting] = useState(false);
     const [categoryNameTextFieldValue, setCategoryNameTextFieldValue] = useState(category.name)
+    const [validationError, setValidationError] = useState<string | null>(null)
 
     const deleteCategoryRequest = async () => {
         setSubmitting(true);
@@ -82,18 +87,26 @@ export function CategoryRow({ category, deleteCategorySuccessful, setError, setM
         [category]
     )
 
+    const handleNameEntry = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setCategoryNameTextFieldValue(e.currentTarget.value)
+        setValidationError(validateCategoryName(e.currentTarget.value))
+    }
+
     return (
         <Table.Tr key={category.id}>
             <Table.Td>
                 <Group align="center">
                     <TextInput
                         value={categoryNameTextFieldValue}
-                        onChange={(e) => setCategoryNameTextFieldValue(e.currentTarget.value)}
+                        onChange={handleNameEntry}
+                        error={validationError}
                     />
                     {
                         categoryNameTextFieldValue !== category.name &&
                         <>
-                            <Button onClick={() => updateCategoryNameRequest(categoryNameTextFieldValue)}>
+                            <Button 
+                            disabled={validationError!==null}
+                            onClick={() => updateCategoryNameRequest(categoryNameTextFieldValue)}>
                                 Submit changes
                             </Button>
                             <Button onClick={() => setCategoryNameTextFieldValue(category.name)}>
