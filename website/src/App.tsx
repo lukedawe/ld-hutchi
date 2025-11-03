@@ -157,14 +157,14 @@ function App() {
             </Table.Thead>
             <Table.Tbody>{rows}</Table.Tbody>
           </Table>
-          <Group mt="md">
-            <Button onClick={open}>
-              Add Category
-            </Button>
-          </Group>
         </>
         : null}
-      <Pagination total={data?.no_pages ?? 0} onChange={(pageNo) => {setCurrentPage(pageNo)}}/>
+      <Group mt="md">
+        <Button onClick={open}>
+          Add Category
+        </Button>
+      </Group>
+      <Pagination total={data?.no_pages ?? 0} onChange={(pageNo) => { setCurrentPage(pageNo) }} />
     </MantineProvider>
   )
 }
