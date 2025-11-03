@@ -14,7 +14,7 @@ const theme = createTheme({
   /** Put your mantine theme override here */
 });
 
-export const API_BASE_URL = 'http://localhost:5173/services/v1'
+export const API_BASE_URL = 'http://localhost/services'
 
 function App() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -41,7 +41,7 @@ function App() {
 
   useEffect(() =>
     setCategories(
-      new Map(data?.categories.map(
+      new Map(data?.categories?.map(
         item => [item.id, item] as const
       ))
     ),

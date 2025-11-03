@@ -28,3 +28,5 @@ The database is hosted on Supabase.
 I am not paricularly happy with the website codebase, especially the sending and receiving of requests. I have used Zod to make handling casting better, but there is still a lot of repeated code for sending requests. Given more tiem I would create a library for sending requests build on top of zod that would expose http methods (`POST()`, `GET()` etc.) and handle the casting and error handling.
 
 Some of the Gorm codebase I am also not happy with. I don't feel that this is a failure with my code particularly, but more a failing of the Gorm library.
+
+HTTPs is also something I would set up in the future, but wasn't vital for the purposes of this project.
