@@ -4,7 +4,7 @@ import { useDisclosure, useFetch } from '@mantine/hooks'
 import { notifications, Notifications } from '@mantine/notifications'
 import '@mantine/notifications/styles.css'
 import { useEffect, useState } from 'react'
-import './App.css'
+// import './App.css'
 import type { AddCategoryJson } from './lib/dtos/requests/category'
 import './lib/dtos/responses'
 import { CategoryResponsePaginated, CategoryResponseZod, ErrorResponseZod, type CategoryResponse, type ErrorResponse } from './lib/dtos/responses'
@@ -14,7 +14,7 @@ const theme = createTheme({
   /** Put your mantine theme override here */
 });
 
-export const API_BASE_URL = 'http://springfieldportal.ddns.net/services'
+export const API_BASE_URL = 'http://springfieldportal.ddns.net:8080/services'
 
 function App() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -134,7 +134,7 @@ function App() {
 
   return (
     <MantineProvider theme={theme}>
-      <AddCategoryModal></AddCategoryModal>
+      <AddCategoryModal/>
       <Button onClick={refetch} loading={loading}>
         Reload
       </Button>

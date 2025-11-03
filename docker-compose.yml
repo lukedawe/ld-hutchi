@@ -33,6 +33,7 @@ services:
     networks:
       - backend
       - frontend
+    restart: always
 
   api:
     image: gin-backend
@@ -51,6 +52,20 @@ services:
       - ENV_FILE=/run/secrets/api_env
     restart: always
 
+  populate:
+    image: python-populater
+    depends_on:
+      - api
+    build:
+      context: ./populate
+    networks:
+      - backend
+    secrets:
+      - api_env
+    environment:
+      - ENV_FILE=/run/secrets/api_env
+    restart: no 
+
 volumes:
   pgdata_prod:
 
@@ -60,7 +75,7 @@ networks:
 
 secrets:
   api_env:
-    file: ./api/.env
+    file: .env
   pg_password:
     file: ./pg_password.txt
   pg_env:

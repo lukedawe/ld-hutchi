@@ -69,7 +69,7 @@ export function CategoryRow({ category, deleteCategorySuccessful, setError, setM
                 return;
             }
             setCategoryState({ ...category, name: newName })
-            setMessage('Category deleted');
+            setMessage('Category updated');
         } catch (err) {
             console.error('delete category error', err);
             const message = err instanceof Error ? err.message : String(err);

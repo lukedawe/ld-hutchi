@@ -4,10 +4,10 @@ from dotenv import load_dotenv
 import os
 
 def main():
-    load_dotenv('api/dev.env')
+    load_dotenv(os.getenv('ENV_FILE'))
     port = os.getenv('PORT')
     if(port == None): return 1
-    with open('common/dogs.json') as f:
+    with open('dogs.json') as f:
         d = json.load(f)
         # print(d)
         request = {"categories":[]}
@@ -19,7 +19,7 @@ def main():
             request["categories"].append(category_entry)
         request = json.dumps(request, indent=2)
         # print(request)
-        response: requests.Response = requests.post('http://localhost:'+port+'/v1/categories', data=request)
+        response: requests.Response = requests.post('http://api:'+port+'/v1/categories', data=request)
         print(response.json())
 
 main()

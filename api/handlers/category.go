@@ -7,7 +7,6 @@ import (
 	response_errors "lukedawe/hutchi/handlers/dtos/responses/errors"
 	"lukedawe/hutchi/models"
 	"lukedawe/hutchi/services"
-	"math"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -55,8 +54,16 @@ func (h *Handler) GetCategoriesToBreeds(c *gin.Context) {
 	}
 
 	response.PageSize = uint(len(response.Categories))
-	pages := math.Ceil(float64(rows / int64(response.PageSize)))
-	response.NoPages = int64(pages)
+
+	getPages := func() float64 {
+		if response.PageSize > 0 {
+			return float64(rows / int64(response.PageSize))
+		} else {
+			return 0.
+		}
+	}
+
+	response.NoPages = int64(getPages())
 
 	c.JSON(http.StatusOK, response)
 }
