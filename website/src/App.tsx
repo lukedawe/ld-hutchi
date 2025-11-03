@@ -14,7 +14,7 @@ const theme = createTheme({
   /** Put your mantine theme override here */
 });
 
-export const API_BASE_URL = 'http://localhost/services'
+export const API_BASE_URL = 'http://springfieldportal.ddns.net/services'
 
 function App() {
   const [currentPage, setCurrentPage] = useState(1);
