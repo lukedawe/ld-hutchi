@@ -4,14 +4,14 @@ services:
     image: postgres
     restart: always
     environment:
-      POSTGRES_PASSWORD_FILE: /run/secrets/pg_password.txt
+      POSTGRES_PASSWORD_FILE: /run/secrets/pg_password
     healthcheck:
       test: ["CMD-SHELL", "pg_isready"]
       interval: 1s
       timeout: 5s
       retries: 10
     volumes:
-      - pgdata:/var/lib/postgresql/data 
+      - pgdata_prod:/var/lib/postgresql/data 
       - ./migrations:/docker-entrypoint-initdb.d
     networks:
       - backend
@@ -48,19 +48,11 @@ services:
     secrets:
       - api_env
     environment:
-      - ENV_LOCATION=/run/secrets/.env
+      - ENV_FILE=/run/secrets/api_env
     restart: always
-
-  adminer:
-    image: adminer
-    restart: always
-    ports:
-      - 8082:8080
-    networks:
-      - backend
 
 volumes:
-  pgdata:
+  pgdata_prod:
 
 networks:
   backend:
@@ -68,8 +60,8 @@ networks:
 
 secrets:
   api_env:
-    file: api/.env
+    file: ./api/.env
   pg_password:
-    file: pg_password.txt
+    file: ./pg_password.txt
   pg_env:
-    file: pg.env
+    file: ./pg.env

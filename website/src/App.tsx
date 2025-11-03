@@ -1,6 +1,6 @@
 import { Button, createTheme, Group, MantineProvider, Modal, Pagination, Table, Text, TextInput } from '@mantine/core'
 import '@mantine/core/styles.css'
-import { useDisclosure, useFetch, usePagination } from '@mantine/hooks'
+import { useDisclosure, useFetch } from '@mantine/hooks'
 import { notifications, Notifications } from '@mantine/notifications'
 import '@mantine/notifications/styles.css'
 import { useEffect, useState } from 'react'
@@ -18,7 +18,7 @@ export const API_BASE_URL = 'http://localhost:5173/services/v1'
 
 function App() {
   const [currentPage, setCurrentPage] = useState(1);
-  const { data, loading, error, refetch, abort } = useFetch<CategoryResponsePaginated>(
+  const { data, loading, error, refetch } = useFetch<CategoryResponsePaginated>(
     `${API_BASE_URL}/breeds/categories/` + currentPage + "/" + 20,
     { autoInvoke: true }
   )
